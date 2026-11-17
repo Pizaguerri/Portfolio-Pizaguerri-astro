@@ -1,34 +1,81 @@
+
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { Image } from 'astro:assets';
 
-const allSelectedImages = import.meta.glob('../content/selected/**/*.{jpg,jpeg,png,webp}', { eager: true });
-const selectedItems = Object.keys(allSelectedImages).map(path => ({ src: allSelectedImages[path].default }));
+const allSelectedImages = import.meta.glob(
+  '../content/selected/**/*.{jpg,jpeg,png,webp}',
+  { eager: true }
+);
+
+const selectedItems = Object.keys(allSelectedImages)
+  .sort()
+  .map((path) => ({
+    src: allSelectedImages[path].default,
+  }));
 ---
 
 <BaseLayout title="Selected Works | Pablo Izaguerri">
-  <div class="site-container" style="padding-top: 0; padding-bottom: 4rem; position: relative; z-index: 1;">
-    
+  <div
+    class="site-container"
+    style="padding-top: 0; padding-bottom: 4rem; position: relative; z-index: 1;"
+  >
+
     <header class="selected-header">
       <h1>Senzills</h1>
     </header>
 
-    <div class="justified-grid" id="post-gallery">
+    <div
+      class="justified-grid justified-gallery"
+      id="post-gallery"
+    >
       {selectedItems.map((item) => (
-        <a 
-          href={item.src.src} 
-          class="grid-item post-gallery-item" 
-          data-pswp-width={item.src.width} 
+        <a
+          href={item.src.src}
+          class="grid-item post-gallery-item gallery-item"
+          data-pswp-width={item.src.width}
           data-pswp-height={item.src.height}
         >
-          <Image 
-            src={item.src} 
-            alt="" 
-            widths={[400, 800, 1200, 1600]} 
-            sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw" 
+          <Image
+            src={item.src}
+            alt=""
+            widths={[400, 800, 1200, 1600]}
+            sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         </a>
       ))}
     </div>
+
   </div>
 </BaseLayout>
+
+<script>
+  import { initJustifiedGallery } from '../scripts/gallery.js';
+
+  let cleanupGallery = null;
+
+  function initGallery() {
+    cleanupGallery?.();
+    cleanupGallery = null;
+
+    const gallery = document.getElementById('post-gallery');
+
+    if (!gallery) return;
+
+    cleanupGallery = initJustifiedGallery(gallery, {
+      itemSelector: '.gallery-item',
+      targetRowHeight: 288,
+      spacing: 8,
+      heightTolerance: 0.25,
+    });
+  }
+
+  document.addEventListener('astro:before-swap', () => {
+    cleanupGallery?.();
+    cleanupGallery = null;
+  });
+
+  document.addEventListener('astro:page-load', initGallery);
+
+  initGallery();
+</script>

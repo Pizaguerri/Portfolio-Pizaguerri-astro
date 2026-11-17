@@ -1,41 +1,104 @@
+
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { Image } from 'astro:assets';
 
 const projects = (await getCollection('projects'))
-  .filter(p => p.id.endsWith('.ca'))
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  .filter((project) => project.id.endsWith('.ca'))
+  .sort((a, b) => {
+    const dateA = a.data.date?.valueOf() ?? 0;
+    const dateB = b.data.date?.valueOf() ?? 0;
+    return dateB - dateA;
+  });
 
-const projectsWithImages = projects.map((p) => {
-  const slug = p.id.replace('.ca', '');
-  const images = import.meta.glob('../../content/projects/**/*.{jpg,jpeg,png,webp}', { eager: true });
-  const imgs = Object.keys(images).filter(k => k.includes(`/projects/${slug}/`)).map(k => images[k].default);
-  imgs.sort((a, b) => a.src.includes('cover') ? -1 : (b.src.includes('cover') ? 1 : 0));
-  return { ...p, slug, image: imgs[0] };
+const images = import.meta.glob(
+  '../../content/projects/**/*.{jpg,jpeg,png,webp}',
+  { eager: true }
+);
+
+const projectsWithImages = projects.map((project) => {
+  const slug = project.id.replace(/\.ca$/, '');
+
+  const projectImages = Object.keys(images)
+    .filter((path) => path.includes(`/projects/${slug}/`))
+    .map((path) => images[path].default);
+
+  projectImages.sort((a, b) => {
+    const aIsCover = a.src.includes('cover');
+    const bIsCover = b.src.includes('cover');
+
+    if (aIsCover && !bIsCover) return -1;
+    if (!aIsCover && bIsCover) return 1;
+    return 0;
+  });
+
+  return {
+    ...project,
+    slug,
+    image: projectImages[0],
+  };
 });
 ---
 
 <BaseLayout title="Projectes | Pablo Izaguerri">
   <div class="site-container" style="padding-top: 0; padding-bottom: 4rem;">
-    
+
     <header class="selected-header">
       <h1>Projectes</h1>
     </header>
 
-    <div class="justified-grid">
+    <div
+      id="projects-index-gallery"
+      class="justified-grid justified-gallery"
+    >
       {projectsWithImages.map((project) => (
-        <a href={`/proyectos/${project.slug}`} class="grid-item">
-          {project.image && (
-            <Image 
-              src={project.image} 
-              alt={project.data.title} 
-              widths={[400, 800, 1200]} 
-              sizes="(max-width: 1200px) 50vw, 33vw" 
+        project.image && (
+          <a
+            href={`/proyectos/${project.slug}`}
+            class="grid-item gallery-item"
+          >
+            <Image
+              src={project.image}
+              alt={project.data.title}
+              widths={[400, 800, 1200]}
+              sizes="(max-width: 1200px) 50vw, 33vw"
             />
-          )}
-        </a>
+          </a>
+        )
       ))}
     </div>
+
   </div>
 </BaseLayout>
+
+<script>
+  import { initJustifiedGallery } from '../../scripts/gallery.js';
+
+  let cleanupGallery = null;
+
+  function initGallery() {
+    cleanupGallery?.();
+    cleanupGallery = null;
+
+    const gallery = document.getElementById('projects-index-gallery');
+
+    if (!gallery) return;
+
+    cleanupGallery = initJustifiedGallery(gallery, {
+      itemSelector: '.gallery-item',
+      targetRowHeight: 288,
+      spacing: 8,
+      heightTolerance: 0.25,
+    });
+  }
+
+  document.addEventListener('astro:before-swap', () => {
+    cleanupGallery?.();
+    cleanupGallery = null;
+  });
+
+  document.addEventListener('astro:page-load', initGallery);
+
+  initGallery();
+</script>

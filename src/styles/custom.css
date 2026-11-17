@@ -1,3 +1,4 @@
+
 /* =========================================================
    BODY
    ========================================================= */
@@ -145,7 +146,7 @@ header a:hover {
   left: 0 !important;
   right: 0 !important;
   width: 100vw !important;
-  background-color: var(--surface-1) !important; /* Usa la variable del tema */
+  background-color: var(--surface-1) !important;
   color: var(--text-1) !important;
   backdrop-filter: blur(10px);
   z-index: 999999 !important;
@@ -186,7 +187,7 @@ header a:hover {
 }
 
 #menu li a:hover {
-  background-color: var(--surface-2) !important; /* Usa la variable del tema */
+  background-color: var(--surface-2) !important;
 }
 
 /* =========================================================
@@ -253,7 +254,6 @@ hgroup {
   z-index: 1;
 }
 
-/* Forzar que todos los títulos de sección tengan el mismo tamaño */
 .selected-header h1,
 .index-section-title {
   font-size: 1.5rem !important;
@@ -362,7 +362,7 @@ section.galleries {
   width: 100%;
   height: 300px;
   object-fit: cover;
-  border-radius: 0px;
+  border-radius: 0;
   transition: transform 0.3s ease;
 }
 
@@ -444,7 +444,7 @@ section.galleries {
 }
 
 /* =========================================================
-   GALERÍAS UNIFICADAS (Selected, Proyectos, Editorial)
+   GALERÍAS UNIFICADAS
    ========================================================= */
 .selected-header {
   display: flex;
@@ -465,36 +465,62 @@ section.galleries {
   margin: 0;
 }
 
+/*
+ * Contenedor del mosaico justificado.
+ * El motor JavaScript calcula las posiciones y alturas.
+ */
 .justified-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
-  gap: 1.5rem;
-  align-items: start;
+  position: relative;
+  display: block;
   width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
-.grid-item { 
-  display: block; 
-  width: 100%; 
-  overflow: hidden; 
+/*
+ * Elementos posicionados por el motor justified-layout.
+ */
+.justified-grid .gallery-item {
+  position: absolute;
+  display: block;
+  box-sizing: border-box;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Imágenes sin recorte */
+.justified-grid .gallery-item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  margin: 0;
+  object-fit: contain;
+  transition: filter 0.3s ease;
+}
+
+/* Compatibilidad con elementos grid-item */
+.grid-item {
+  display: block;
+  width: 100%;
+  overflow: hidden;
   cursor: pointer;
 }
 
-.grid-item img { 
-  width: 100%; 
-  height: auto; 
-  display: block; 
-  transition: filter 0.3s ease; 
-}
-
 @media (min-width: 769px) {
-  .grid-item:hover img { 
-    filter: grayscale(100%); 
+  .justified-grid .gallery-item:hover img {
+    filter: grayscale(100%);
   }
+
   .editorial-item:hover .editorial-image img {
     filter: grayscale(100%);
   }
 }
+
 /* =========================================================
    LIGHTBOX — CAPTION
    ========================================================= */
@@ -532,7 +558,6 @@ section.galleries {
   user-drag: none;
 }
 
-
 /* =========================================================
    LIGHTBOX — BACKGROUND / BLUR
    ========================================================= */
@@ -544,7 +569,6 @@ section.galleries {
   background: rgba(0, 0, 0, 0.65);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  /* Sin transición de backdrop-filter, solo opacidad controlada por JS */
 }
 
 /* =========================================================
@@ -635,7 +659,9 @@ body.home footer section:last-of-type {
   }
 }
 
-/* ========== POST GALLERY — EDITORIAL MOSAIC ========== */
+/* =========================================================
+   POST GALLERY — EDITORIAL MOSAIC
+   ========================================================= */
 .post-gallery {
   width: 100%;
   margin: 5rem auto 4rem;
@@ -666,100 +692,35 @@ body.home footer section:last-of-type {
   color: var(--text-2);
 }
 
-.post-gallery-block {
-  display: grid;
-  grid-template-rows: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
+/*
+ * Las antiguas reglas de bloques y columnas se eliminan:
+ * el mosaico ahora se distribuye mediante justified-layout.
+ */
 
-.post-gallery-block-left {
-  grid-template-columns: 2fr 1fr;
-}
-
-.post-gallery-block-right {
-  grid-template-columns: 1fr 2fr;
-}
-
-.post-gallery-block > .post-gallery-item.is-large {
-  grid-row: 1 / 3;
-  height: 100%;
-  min-height: 0;
-  aspect-ratio: auto;
-}
-
-.post-gallery-block-left > .post-gallery-item.is-large {
-  grid-column: 1;
-}
-
-.post-gallery-block-right > .post-gallery-item.is-large {
-  grid-column: 2;
-}
-
-.post-gallery-block > .post-gallery-item.is-small-top {
-  grid-row: 1;
-  height: 100%;
-  min-height: 0;
-  aspect-ratio: auto;
-}
-
-.post-gallery-block > .post-gallery-item.is-small-bottom {
-  grid-row: 2;
-  height: 100%;
-  min-height: 0;
-  aspect-ratio: auto;
-}
-
-.post-gallery-block-left > .post-gallery-item.is-small-top,
-.post-gallery-block-left > .post-gallery-item.is-small-bottom {
-  grid-column: 2;
-}
-
-.post-gallery-block-right > .post-gallery-item.is-small-top,
-.post-gallery-block-right > .post-gallery-item.is-small-bottom {
-  grid-column: 1;
-}
-
-.post-gallery-remainder {
-  display: grid;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.post-gallery-remainder-2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.post-gallery-remainder-1 {
-  grid-template-columns: 2fr 1fr;
-}
-
-.post-gallery-remainder-1 .post-gallery-item {
-  grid-column: 1;
-}
-
+/* Elementos de galería */
 .post-gallery-item {
-  position: relative;
+  position: absolute;
   display: block;
   min-width: 0;
   margin: 0;
   padding: 0;
   overflow: hidden;
-  aspect-ratio: 3 / 2;
-  background: var(--surface-2);
+  background: transparent;
   text-decoration: none;
   color: inherit;
 }
 
+/* La imagen conserva su proporción original */
 .post-gallery-item img {
   width: 100%;
   height: 100%;
   display: block;
   margin: 0;
-  object-fit: cover;
-  transition: transform 0.5s ease;
+  object-fit: contain;
+  transition: filter 0.3s ease;
 }
 
+/* Pie de foto */
 .post-gallery-item .pswp-caption-content {
   position: absolute;
   left: 0;
@@ -775,6 +736,7 @@ body.home footer section:last-of-type {
   text-align: center;
   opacity: 0;
   transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
 .post-gallery-item:hover .pswp-caption-content {
@@ -782,37 +744,17 @@ body.home footer section:last-of-type {
 }
 
 @media (max-width: 768px) {
-  .post-gallery { margin-top: 3rem; }
-  .post-gallery-heading { margin-bottom: 2.5rem; }
-  .post-gallery-line { width: 70%; margin-bottom: 1.25rem; }
-
-  .post-gallery-remainder,
-  .post-gallery-remainder-1,
-  .post-gallery-remainder-2 {
-    display: flex;
-    flex-direction: column;
-    gap: .75rem;
-    margin-bottom: .75rem;
+  .post-gallery {
+    margin-top: 3rem;
   }
 
-  .post-gallery-remainder .post-gallery-item {
-    width: 100%;
-    aspect-ratio: 3 / 2;
+  .post-gallery-heading {
+    margin-bottom: 2.5rem;
   }
 
-  .post-gallery-block,
-  .post-gallery-block-left,
-  .post-gallery-block-right {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .post-gallery-block > .post-gallery-item {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 3 / 2;
+  .post-gallery-line {
+    width: 70%;
+    margin-bottom: 1.25rem;
   }
 
   .post-gallery-item .pswp-caption-content {
@@ -820,9 +762,9 @@ body.home footer section:last-of-type {
   }
 }
 
-/* ---------------------------------
+/* =========================================================
    PRINT
-   --------------------------------- */
+   ========================================================= */
 .print-request-button {
   display: flex;
   align-items: center;
@@ -875,87 +817,85 @@ img {
 /* =========================================================
    ANIMACIONES PERSONALIZADAS
    ========================================================= */
-/* Hacemos que la transición sea más lenta y suave */
 [data-animate] {
-  transition-duration: 800ms !important; /* 1 segundo */
-  transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1) !important; /* Curva suave */
+  transition-duration: 800ms !important;
+  transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
 
-/* Si quieres que el deslizamiento sea más pronunciado, aumenta el translateY */
 [data-animate="slide-up"] {
-  --animate-translate-y: 40px; /* Ajusta a tu gusto (por defecto suele ser 20px) */
+  --animate-translate-y: 40px;
 }
 
 /* =========================================================
    NEGRITAS EN AZUL
    ========================================================= */
-    .prose strong, .prose b {
-        color: var(--bold);
-        font-weight: 600;
-    }
+.prose strong,
+.prose b {
+  color: var(--bold);
+  font-weight: 600;
+}
 
-    /* =========================================================
-       LIGHTBOX — OCULTAR BOTONES NATIVOS (excepto los nuestros)
-       ========================================================= */
-    .pswp__button:not(.pswp__button--custom-prev-arrow):not(.pswp__button--custom-next-arrow),
-    .pswp__counter,
-    .pswp__preloader {
-      display: none !important;
-      opacity: 0 !important;
-      pointer-events: none !important;
-    }
-    
-    /* =========================================
-       LIGHTBOX - FLECHAS PERSONALIZADAS
-       ========================================= */
-    .pswp__button--custom-prev-arrow,
-    .pswp__button--custom-next-arrow {
-      position: fixed;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 999999;
-      width: 48px;
-      height: 48px;
-      display: flex !important;
-      align-items: center;
-      justify-content: center;
-      background: transparent; /* Fondo transparente */
-      border: none;
-      cursor: pointer;
-      color: rgba(255, 255, 255, 0.6);
-      transition: color 0.2s ease, transform 0.2s ease;
-      padding: 0;
-    }
-    
-    .pswp__button--custom-prev-arrow {
-      left: 2rem;
-    }
-    .pswp__button--custom-next-arrow {
-      right: 2rem;
-    }
-    
-    .pswp__button--custom-prev-arrow:hover,
-    .pswp__button--custom-next-arrow:hover {
-      color: rgba(255, 255, 255, 1);
-      transform: translateY(-50%) scale(1.1);
-    }
-    
-    /* =========================================
-       AJUSTE PARA MÓVIL: SIN FONDO REDONDEADO
-       ========================================= */
-    @media (max-width: 768px) {
-      .pswp__button--custom-prev-arrow,
-      .pswp__button--custom-next-arrow {
-        width: 36px; /* Un poco más pequeño */
-        height: 36px;
-        /* Eliminamos background y border-radius */
-        background: transparent; 
-        border-radius: 0;
-      }
-      .pswp__button--custom-prev-arrow {
-        left: 0.5rem;
-      }
-      .pswp__button--custom-next-arrow {
-        right: 0.5rem;
-      }
-    }
+/* =========================================================
+   LIGHTBOX — OCULTAR BOTONES NATIVOS
+   ========================================================= */
+.pswp__button:not(.pswp__button--custom-prev-arrow):not(.pswp__button--custom-next-arrow),
+.pswp__counter,
+.pswp__preloader {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* =========================================================
+   LIGHTBOX — FLECHAS PERSONALIZADAS
+   ========================================================= */
+.pswp__button--custom-prev-arrow,
+.pswp__button--custom-next-arrow {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 999999;
+  width: 48px;
+  height: 48px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.6);
+  transition: color 0.2s ease, transform 0.2s ease;
+  padding: 0;
+}
+
+.pswp__button--custom-prev-arrow {
+  left: 2rem;
+}
+
+.pswp__button--custom-next-arrow {
+  right: 2rem;
+}
+
+.pswp__button--custom-prev-arrow:hover,
+.pswp__button--custom-next-arrow:hover {
+  color: rgba(255, 255, 255, 1);
+  transform: translateY(-50%) scale(1.1);
+}
+
+@media (max-width: 768px) {
+  .pswp__button--custom-prev-arrow,
+  .pswp__button--custom-next-arrow {
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border-radius: 0;
+  }
+
+  .pswp__button--custom-prev-arrow {
+    left: 0.5rem;
+  }
+
+  .pswp__button--custom-next-arrow {
+    right: 0.5rem;
+  }
+}
