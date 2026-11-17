@@ -1,186 +1,524 @@
+
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { Image, getImage } from 'astro:assets';
+import Expos from '../../components/expos.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
-  return posts.filter((p) => p.id.endsWith('.ca')).map((p) => ({
-      params: { slug: p.id.replace('.ca', '') }, props: { post: p },
-  }));
+
+  return posts
+    .filter((post) => post.id.endsWith('.ca'))
+    .map((post) => ({
+      params: { slug: post.id.replace(/\.ca$/, '') },
+      props: { post },
+    }));
 }
 
 const { post } = Astro.props;
 const { Content } = await render(post);
-const slug = post.id.replace('.ca', '');
-const allImages = import.meta.glob('../../content/blog/**/*.{jpg,jpeg,png,webp}', { eager: true });
+const slug = post.id.replace(/\.ca$/, '');
 
-const galleryPaths = Object.keys(allImages).filter(key => key.includes(`/blog/${slug}/`) && !key.includes('cover.jpg'));
-const coverPath = Object.keys(allImages).find(key => key.includes(`/blog/${slug}/`) && key.includes('cover.jpg'));
+const allImages = import.meta.glob(
+  '../../content/blog/**/*.{jpg,jpeg,png,webp}',
+  { eager: true }
+);
 
-// Procesar imágenes
+const postImagePaths = Object.keys(allImages)
+  .filter((path) => path.includes(`/blog/${slug}/`));
+
+const galleryPaths = postImagePaths
+  .filter((path) => !path.toLowerCase().includes('cover.jpg'))
+  .sort();
+
+const coverPath = postImagePaths.find((path) =>
+  path.toLowerCase().includes('cover.jpg')
+);
+
 let coverImage = null;
+
 if (coverPath) {
   const src = allImages[coverPath].default;
   const optimized = await getImage({ src });
-  coverImage = { src, width: optimized.attributes.width, height: optimized.attributes.height };
+
+  coverImage = {
+    src,
+    width: optimized.attributes.width,
+    height: optimized.attributes.height,
+  };
 }
 
-const galleryImages = await Promise.all(galleryPaths.map(async (key) => {
-  const src = allImages[key].default;
-  const optimized = await getImage({ src });
-  return { src, width: optimized.attributes.width, height: optimized.attributes.height };
-}));
+const galleryImages = await Promise.all(
+  galleryPaths.map(async (path) => {
+    const src = allImages[path].default;
+    const optimized = await getImage({ src });
 
-// Para el slider, juntamos portada + galería
-const sliderImages = coverImage ? [coverImage, ...galleryImages] : galleryImages;
+    return {
+      src,
+      width: optimized.attributes.width,
+      height: optimized.attributes.height,
+    };
+  })
+);
 
-const chunks = [];
-for (let i = 0; i < galleryImages.length; i += 3) { chunks.push(galleryImages.slice(i, i + 3)); }
+const sliderImages = coverImage
+  ? [coverImage, ...galleryImages]
+  : galleryImages;
 ---
 
-<BaseLayout title={`${post.data.title} | Blog`} description={post.data.description}>
-  
+<BaseLayout
+  title={`${post.data.title} | Blog`}
+  description={post.data.description}
+>
   <div id="project-gallery-container">
-    
+
     <!-- VISTA SLIDER -->
     <div class="slider-container" id="slider-container">
       <div class="slider-track" id="slider-track">
         {sliderImages.map((img, index) => (
-          <a href={img.src.src} class="slider-item" data-pswp-width={img.width} data-pswp-height={img.height}>
-            <Image src={img.src} alt="" width={img.width} height={img.height} loading={index === 0 ? "eager" : "lazy"} />
+          <a
+            href={img.src.src}
+            class="slider-item"
+            data-pswp-width={img.width}
+            data-pswp-height={img.height}
+            data-pswp-active="true"
+          >
+            <Image
+              src={img.src}
+              alt=""
+              width={img.width}
+              height={img.height}
+              loading={index === 0 ? 'eager' : 'lazy'}
+            />
           </a>
         ))}
       </div>
     </div>
 
-    <!-- VISTA MOSAICO -->
-    <div class="mosaic-container" id="mosaic-container" style="display: none;">
-      <div class="site-container" style="padding-top: 2rem; padding-bottom: 2rem;">
-        <div class="post-gallery">
-          {chunks.map((chunk, index) => {
-            if (chunk.length === 3) {
-              return (
-                <div class={`post-gallery-block post-gallery-block-${index % 2 === 0 ? 'left' : 'right'}`}>
-                  <a href={chunk[0].src.src} class="post-gallery-item is-large" data-pswp-width={chunk[0].width} data-pswp-height={chunk[0].height}>
-                    <Image src={chunk[0].src} alt="" widths={[600, 1200]} sizes="(max-width: 800px) 100vw, 60vw" width={chunk[0].width} height={chunk[0].height} />
-                  </a>
-                  <a href={chunk[1].src.src} class="post-gallery-item is-small-top" data-pswp-width={chunk[1].width} data-pswp-height={chunk[1].height}>
-                    <Image src={chunk[1].src} alt="" widths={[300, 600]} sizes="(max-width: 800px) 100vw, 40vw" width={chunk[1].width} height={chunk[1].height} />
-                  </a>
-                  <a href={chunk[2].src.src} class="post-gallery-item is-small-bottom" data-pswp-width={chunk[2].width} data-pswp-height={chunk[2].height}>
-                    <Image src={chunk[2].src} alt="" widths={[300, 600]} sizes="(max-width: 800px) 100vw, 40vw" width={chunk[2].width} height={chunk[2].height} />
-                  </a>
-                </div>
-              );
-            }
-            return (
-              <div class={`post-gallery-remainder post-gallery-remainder-${chunk.length}`}>
-                {chunk.map((img) => (
-                  <a href={img.src.src} class="post-gallery-item" data-pswp-width={img.width} data-pswp-height={img.height}>
-                    <Image src={img.src} alt="" widths={[600, 1200]} sizes="(max-width: 800px) 100vw, 50vw" width={img.width} height={img.height} />
-                  </a>
-                ))}
-              </div>
-            );
-          })}
+    <!-- VISTA MOSAICO JUSTIFICADO -->
+    <div
+      class="mosaic-container"
+      id="mosaic-container"
+      style="display: none;"
+    >
+      <div class="site-container mosaic-inner">
+        <div
+          id="blog-mosaic-gallery"
+          class="justified-grid justified-gallery"
+        >
+          {galleryImages.map((img) => (
+            <a
+              href={img.src.src}
+              class="post-gallery-item gallery-item blog-mosaic-item"
+              data-pswp-width={img.width}
+              data-pswp-height={img.height}
+              data-pswp-active="false"
+            >
+              <Image
+                src={img.src}
+                alt=""
+                widths={[400, 800, 1200]}
+                sizes="(max-width: 800px) 100vw, 1000px"
+                width={img.width}
+                height={img.height}
+              />
+            </a>
+          ))}
         </div>
       </div>
     </div>
+
   </div>
 
   <!-- LAYOUT EDITORIAL -->
   <div class="content-container">
     <article class="project-layout">
-      
+
       <aside class="project-sidebar">
         <div class="sidebar-header">
           <h1>{post.data.title}</h1>
-          
-          <button id="toggle-gallery-btn" class="toggle-gallery-btn" aria-label="Alternar vista" title="Ver galería/mosaico">
-            <svg id="icon-grid" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-            <svg id="icon-slider" style="display: none;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+
+          <button
+            id="toggle-gallery-btn"
+            class="toggle-gallery-btn"
+            aria-label="Alternar vista"
+            aria-pressed="false"
+            title="Ver galería/mosaico"
+            type="button"
+          >
+            <svg
+              id="icon-grid"
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+
+            <svg
+              id="icon-slider"
+              style="display: none;"
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect
+                x="3"
+                y="3"
+                width="18"
+                height="18"
+                rx="2"
+                ry="2"
+              ></rect>
+            </svg>
           </button>
         </div>
 
         {post.data.date && (
-          <span class="project-year">{post.data.date.getFullYear()}</span>
+          <span class="project-year">
+            {post.data.date.getFullYear()}
+          </span>
         )}
-        <div class="project-tags">
-          {post.data.tags?.map(tag => (
-            <span class={`tag bg-gray-500`}>{tag}</span> // Si el blog no tiene tags con colores, usamos gris
+
+        <ul class="project-tags">
+          {post.data.tags?.map((tag) => (
+            <li class="tag">{tag}</li>
           ))}
-        </div>
+        </ul>
+
+        <Expos
+          cv={post.data.cv}
+          lang="ca"
+        />
       </aside>
 
       <div class="project-main">
-        <p class="project-summary">{post.data.description}</p>
+        <p class="project-summary">
+          {post.data.description}
+        </p>
+
         <div class="prose">
-          <Content components={{ img: (props) => <Image {...props} widths={[800, 1200]} sizes="(max-width: 800px) 100vw, 800px" style="width: 100%; height: auto; border-radius: 0; margin: 2rem 0;" /> }} />
+          <Content
+            components={{
+              img: (props) => (
+                <Image
+                  {...props}
+                  widths={[800, 1200]}
+                  sizes="(max-width: 800px) 100vw, 800px"
+                  style="width: 100%; height: auto; border-radius: 0; margin: 2rem 0;"
+                />
+              ),
+            }}
+          />
         </div>
       </div>
+
     </article>
   </div>
-
 </BaseLayout>
 
 <style>
-  /* Reutilizamos los estilos de [slug].astro de proyectos */
-  #project-gallery-container { width: 100%; margin-bottom: 3rem; }
-  .slider-container { width: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
-  .slider-container::-webkit-scrollbar { display: none; }
-  .slider-track { display: flex; height: 70vh; align-items: center; }
-  .slider-item { flex: 0 0 100%; height: 100%; scroll-snap-align: center; display: flex; justify-content: center; align-items: center; padding: 2rem; box-sizing: border-box; cursor: zoom-in; text-decoration: none; }
-  .slider-item img { max-width: 100%; max-height: 100%; object-fit: contain; }
-  
-  .sidebar-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem; }
-  .project-sidebar h1 { font-size: 2.5rem; font-weight: 600; line-height: 1.1; margin: 0; color: var(--text-1); }
-  .toggle-gallery-btn { background: transparent; border: 1px solid var(--border); color: var(--text-1); padding: 0.5rem; cursor: pointer; border-radius: 4px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .toggle-gallery-btn:hover { background: var(--surface-2); }
-  
-  .project-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 4rem; padding: 2rem 0 6rem 0; }
-  .project-sidebar { position: sticky; top: 6rem; align-self: start; }
-  .project-year { display: block; font-size: 1.1rem; color: var(--text-2); margin-bottom: 2rem; }
-  .project-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-  .project-summary { font-size: 1.5rem; line-height: 1.5; margin-top: 0; margin-bottom: 3rem; color: var(--text-1); font-weight: 500; }
-
-  @media (max-width: 900px) {
-    .project-layout { grid-template-columns: 1fr; gap: 2rem; padding-bottom: 4rem; }
-    .project-sidebar { position: static; }
-    .slider-track { height: 50vh; }
-    .slider-item { padding: 1rem; }
-    .project-summary { font-size: 1.2rem; }
-    .sidebar-header { flex-direction: row; align-items: center; }
-    .project-sidebar h1 { font-size: 2rem; }
+  /* SLIDER */
+  #project-gallery-container {
+    width: 100%;
+    margin-bottom: 3rem;
   }
 
-  .tag { font-size: 0.75rem; font-weight: 500; padding: 0.25rem 0.75rem; border-radius: 999px; color: #fff; text-transform: uppercase; letter-spacing: 0.05em; }
-  .bg-gray-500 { background-color: #6b7280; }
+  .slider-container {
+    width: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .slider-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .slider-track {
+    display: flex;
+    height: 70vh;
+    align-items: center;
+  }
+
+  .slider-item {
+    flex: 0 0 100%;
+    height: 100%;
+    scroll-snap-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    box-sizing: border-box;
+    cursor: zoom-in;
+    text-decoration: none;
+  }
+
+  .slider-item img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  /* MOSAICO */
+  .mosaic-inner {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+
+  #blog-mosaic-gallery {
+    position: relative;
+    width: 100%;
+  }
+
+  .blog-mosaic-item {
+    display: block;
+    cursor: zoom-in;
+  }
+
+  .blog-mosaic-item img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  /* BOTÓN Y SIDEBAR */
+  .sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .project-sidebar h1 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    line-height: 1.1;
+    margin: 0;
+    color: var(--text-1);
+  }
+
+  .toggle-gallery-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-1);
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .toggle-gallery-btn:hover {
+    background: var(--surface-2);
+  }
+
+  /* LAYOUT EDITORIAL */
+  .project-layout {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 4rem;
+    padding: 2rem 0 6rem 0;
+  }
+
+  .project-sidebar {
+    position: sticky;
+    top: 6rem;
+    align-self: start;
+  }
+
+  .project-year {
+    display: block;
+    font-size: 1.1rem;
+    color: var(--text-2);
+    margin-bottom: 2rem;
+  }
+
+  .project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .project-summary {
+    font-size: 1.5rem;
+    line-height: 1.5;
+    margin-top: 0;
+    margin-bottom: 3rem;
+    color: var(--text-1);
+    font-weight: 500;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .project-layout {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      padding-bottom: 4rem;
+    }
+
+    .project-sidebar {
+      position: static;
+    }
+
+    .slider-track {
+      height: 50vh;
+    }
+
+    .slider-item {
+      padding: 1rem;
+    }
+
+    .project-summary {
+      font-size: 1.2rem;
+    }
+
+    .sidebar-header {
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .project-sidebar h1 {
+      font-size: 2rem;
+    }
+  }
+
+  .tag {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background-color: #6b7280;
+  }
 </style>
 
 <script>
-  document.addEventListener('astro:page-load', () => {
-    const toggleBtn = document.getElementById('toggle-gallery-btn');
+  import { initJustifiedGallery } from '../../scripts/gallery.js';
+
+  let cleanupGallery = null;
+  let toggleHandler = null;
+
+  function setActiveView(isMosaic) {
     const sliderContainer = document.getElementById('slider-container');
     const mosaicContainer = document.getElementById('mosaic-container');
     const iconGrid = document.getElementById('icon-grid');
     const iconSlider = document.getElementById('icon-slider');
+    const toggleBtn = document.getElementById('toggle-gallery-btn');
 
-    if (toggleBtn && sliderContainer && mosaicContainer) {
-      toggleBtn.addEventListener('click', () => {
-        const isSliderVisible = sliderContainer.style.display !== 'none';
-        if (isSliderVisible) {
-          sliderContainer.style.display = 'none';
-          mosaicContainer.style.display = 'block';
-          iconGrid.style.display = 'none';
-          iconSlider.style.display = 'block';
-        } else {
-          sliderContainer.style.display = 'block';
-          mosaicContainer.style.display = 'none';
-          iconGrid.style.display = 'block';
-          iconSlider.style.display = 'none';
-        }
-      });
+    if (
+      !sliderContainer ||
+      !mosaicContainer ||
+      !iconGrid ||
+      !iconSlider ||
+      !toggleBtn
+    ) {
+      return;
     }
-  });
+
+    sliderContainer.style.display = isMosaic ? 'none' : 'block';
+    mosaicContainer.style.display = isMosaic ? 'block' : 'none';
+
+    iconGrid.style.display = isMosaic ? 'none' : 'block';
+    iconSlider.style.display = isMosaic ? 'block' : 'none';
+
+    toggleBtn.setAttribute('aria-pressed', String(isMosaic));
+
+    sliderContainer
+      .querySelectorAll('[data-pswp-active]')
+      .forEach((item) => {
+        item.setAttribute('data-pswp-active', String(!isMosaic));
+      });
+
+    mosaicContainer
+      .querySelectorAll('[data-pswp-active]')
+      .forEach((item) => {
+        item.setAttribute('data-pswp-active', String(isMosaic));
+      });
+
+    if (isMosaic) {
+      const gallery = document.getElementById('blog-mosaic-gallery');
+
+      if (gallery && !cleanupGallery) {
+        cleanupGallery = initJustifiedGallery(gallery, {
+          itemSelector: '.gallery-item',
+          targetRowHeight: 288,
+          spacing: 8,
+          heightTolerance: 0.25,
+        });
+      }
+    }
+  }
+
+  function initBlogGallery() {
+    cleanupGallery?.();
+    cleanupGallery = null;
+
+    const toggleBtn = document.getElementById('toggle-gallery-btn');
+
+    if (!toggleBtn) return;
+
+    if (toggleHandler) {
+      toggleBtn.removeEventListener('click', toggleHandler);
+    }
+
+    toggleHandler = () => {
+      const mosaicContainer = document.getElementById('mosaic-container');
+
+      if (!mosaicContainer) return;
+
+      const isMosaicVisible =
+        mosaicContainer.style.display !== 'none';
+
+      setActiveView(!isMosaicVisible);
+    };
+
+    toggleBtn.addEventListener('click', toggleHandler);
+
+    setActiveView(false);
+  }
+
+  function cleanupBlogGallery() {
+    cleanupGallery?.();
+    cleanupGallery = null;
+
+    const toggleBtn = document.getElementById('toggle-gallery-btn');
+
+    if (toggleBtn && toggleHandler) {
+      toggleBtn.removeEventListener('click', toggleHandler);
+    }
+
+    toggleHandler = null;
+  }
+
+  document.addEventListener('astro:page-load', initBlogGallery);
+  document.addEventListener('astro:before-swap', cleanupBlogGallery);
+
+  initBlogGallery();
 </script>

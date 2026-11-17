@@ -1,7 +1,9 @@
+
 ---
-import { getEntry, render } from 'astro:content';
+import { getEntry, getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { Image } from 'astro:assets';
+import Expos from '../../components/expos.astro';
 
 const aboutEntry = await getEntry('about', 'index.ca');
 
@@ -10,18 +12,108 @@ if (!aboutEntry) {
 }
 
 const { Content } = await render(aboutEntry);
+
+// Recuperar el CV manual
+const manualCVEntry = await getEntry('about', 'cv.ca');
+const manualCV = manualCVEntry?.data;
+
+// Recuperar proyectos y entradas editoriales
+const projects = await getCollection('projects');
+const blogPosts = await getCollection('blog');
+
+// Excluir borradores
+const allEntries = [
+  ...projects,
+  ...blogPosts,
+].filter((entry) => !entry.data.draft);
+
+// Estructura agregada del CV
+const fullCV = {
+  exposicions: [] as string[],
+  llibres: [] as string[],
+  premis: [] as string[],
+  'col·laboracions': [] as string[],
+};
+
+type CVKey = keyof typeof fullCV;
+
+// Recopilar información automática de proyectos y blog
+allEntries.forEach((entry) => {
+  const cv = entry.data.cv;
+
+  if (!cv) return;
+
+  fullCV.exposicions.push(...cv.exposicions);
+  fullCV.llibres.push(...cv.llibres);
+  fullCV.premis.push(...cv.premis);
+  fullCV['col·laboracions'].push(...cv['col·laboracions']);
+});
+
+// Incorporar información manual
+if (manualCV) {
+  (Object.keys(fullCV) as CVKey[]).forEach((key) => {
+    fullCV[key].push(...manualCV[key]);
+  });
+}
+
+// Extraer el último año de cuatro cifras encontrado en una entrada
+function extractYear(value: string): number | null {
+  const matches = [...value.matchAll(/\b(?:18|19|20|21)\d{2}\b/g)];
+
+  if (matches.length === 0) return null;
+
+  return Number(matches[matches.length - 1][0]);
+}
+
+// Eliminar duplicados y ordenar por año descendente
+(Object.keys(fullCV) as CVKey[]).forEach((key) => {
+  const uniqueItems = [
+    ...new Set(
+      fullCV[key]
+        .map((item) => item.trim())
+        .filter(Boolean)
+    ),
+  ];
+
+  fullCV[key] = uniqueItems.sort((a, b) => {
+    const yearA = extractYear(a);
+    const yearB = extractYear(b);
+
+    // Las entradas sin año aparecen al final
+    if (yearA === null && yearB !== null) return 1;
+    if (yearA !== null && yearB === null) return -1;
+
+    // Orden cronológico descendente
+    if (yearA !== null && yearB !== null && yearA !== yearB) {
+      return yearB - yearA;
+    }
+
+    // Desempate alfabético
+    return a.localeCompare(b, 'ca');
+  });
+});
 ---
 
 <BaseLayout title="Sobre jo | Pablo Izaguerri" lang="ca">
-  <div class="content-container" style="padding-top: 4rem; padding-bottom: 4rem;">
-    
-
+  <div
+    class="content-container"
+    style="padding-top: 4rem; padding-bottom: 4rem;"
+  >
     <div class="prose">
-      <Content 
-        components={{ 
-          img: (props) => <Image {...props} widths={[800, 1200]} sizes="(max-width: 800px) 100vw, 800px" style="width: 100%; height: auto; border-radius: 0; margin: 2rem 0;" />
-        }} 
+      <Content
+        components={{
+          img: (props) => (
+            <Image
+              {...props}
+              widths={[800, 1200]}
+              sizes="(max-width: 800px) 100vw, 800px"
+              style="width: 100%; height: auto; border-radius: 0; margin: 2rem 0;"
+            />
+          ),
+        }}
       />
     </div>
+
+    <Expos cv={fullCV} lang="ca" />
   </div>
 </BaseLayout>

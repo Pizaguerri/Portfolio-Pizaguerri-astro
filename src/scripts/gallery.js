@@ -1,10 +1,55 @@
+
 import justifiedLayout from "./justified-layout.js";
-import * as params from "@params";
 
-const gallery = document.getElementById("gallery");
+/**
+ * Inicializa una galería con distribución justificada.
+ *
+ * @param {HTMLElement} gallery
+ * @param {Object} options
+ * @param {string} options.itemSelector
+ * @param {number} options.targetRowHeight
+ * @param {number} options.spacing
+ * @param {number} options.heightTolerance
+ * @returns {Function} cleanup
+ */
+export function initJustifiedGallery(gallery, options = {}) {
+  if (!gallery) {
+    return () => {};
+  }
 
-if (gallery) {
-  const items = Array.from(gallery.querySelectorAll(".gallery-item"));
+  const {
+    itemSelector = ".gallery-item",
+    targetRowHeight = 288,
+    spacing = 8,
+    heightTolerance = 0.25,
+  } = options;
+
+  const items = Array.from(gallery.querySelectorAll(itemSelector));
+
+  if (!items.length) {
+    return () => {};
+  }
+
+  // Guardar los estilos originales.
+  const originalGalleryStyle = gallery.getAttribute("style");
+
+  const originalItemStyles = new Map();
+  const originalImageStyles = new Map();
+
+  items.forEach((item) => {
+    originalItemStyles.set(item, item.getAttribute("style"));
+
+    const img = item.querySelector("img");
+
+    if (img) {
+      originalImageStyles.set(img, img.getAttribute("style"));
+    }
+  });
+
+  let containerWidth = 0;
+  let destroyed = false;
+  let resizeObserver = null;
+  let resizeFrame = null;
 
   const getAspectRatios = () =>
     items.map((item) => {
@@ -14,25 +59,43 @@ if (gallery) {
         return 1;
       }
 
-      const width = Number.parseFloat(img.getAttribute("width"));
-      const height = Number.parseFloat(img.getAttribute("height"));
+      const width =
+        img.naturalWidth ||
+        Number.parseFloat(img.getAttribute("width"));
 
-      if (!Number.isFinite(width) || !Number.isFinite(height) || height <= 0) {
+      const height =
+        img.naturalHeight ||
+        Number.parseFloat(img.getAttribute("height"));
+
+      if (
+        !Number.isFinite(width) ||
+        !Number.isFinite(height) ||
+        width <= 0 ||
+        height <= 0
+      ) {
         return 1;
       }
-
-      img.style.width = "100%";
-      img.style.height = "auto";
 
       return width / height;
     });
 
-  let containerWidth = 0;
+  /**
+   * Calcula y aplica la distribución.
+   *
+   * @param {boolean} force Fuerza el cálculo aunque el ancho no cambie.
+   */
+  const updateGallery = (force = false) => {
+    if (destroyed) {
+      return;
+    }
 
-  const updateGallery = () => {
     const width = gallery.getBoundingClientRect().width;
 
-    if (!width || width === containerWidth) {
+    if (!width) {
+      return;
+    }
+
+    if (!force && Math.abs(width - containerWidth) < 0.5) {
       return;
     }
 
@@ -41,19 +104,19 @@ if (gallery) {
     const aspectRatios = getAspectRatios();
 
     if (!aspectRatios.length) {
-      gallery.style.height = "";
-      gallery.style.visibility = "";
+      gallery.style.height = "0px";
       return;
     }
 
     const layout = justifiedLayout(aspectRatios, {
       rowWidth: width,
-      spacing: Number.isInteger(params.boxSpacing) ? params.boxSpacing : 8,
-      rowHeight: params.targetRowHeight || 288,
-      heightTolerance: Number.isInteger(params.targetRowHeightTolerance)
-        ? params.targetRowHeightTolerance
-        : 0.25,
+      spacing,
+      rowHeight: targetRowHeight,
+      heightTolerance,
     });
+
+    gallery.style.position = "relative";
+    gallery.style.height = `${layout.containerHeight}px`;
 
     items.forEach((item, index) => {
       const box = layout.boxes[index];
@@ -62,7 +125,12 @@ if (gallery) {
         return;
       }
 
-      const { width: boxWidth, height, top, left } = box;
+      const {
+        width: boxWidth,
+        height,
+        top,
+        left,
+      } = box;
 
       item.style.position = "absolute";
       item.style.width = `${boxWidth}px`;
@@ -70,20 +138,99 @@ if (gallery) {
       item.style.top = `${top}px`;
       item.style.left = `${left}px`;
       item.style.overflow = "hidden";
-    });
 
-    gallery.style.position = "relative";
-    gallery.style.height = `${layout.containerHeight}px`;
-    gallery.style.visibility = "";
+      const img = item.querySelector("img");
+
+      if (img) {
+        img.style.width = "100%";
+        img.style.height = "100%";
+        img.style.objectFit = "contain";
+      }
+    });
   };
 
+  // Agrupar las actualizaciones para evitar cálculos repetidos.
+  const scheduleUpdate = (force = false) => {
+    if (destroyed) {
+      return;
+    }
+
+    if (resizeFrame !== null) {
+      cancelAnimationFrame(resizeFrame);
+    }
+
+    resizeFrame = requestAnimationFrame(() => {
+      resizeFrame = null;
+      updateGallery(force);
+    });
+  };
+
+  // Recalcular cuando las imágenes terminan de cargar.
+  const images = items
+    .map((item) => item.querySelector("img"))
+    .filter(Boolean);
+
+  images.forEach((img) => {
+    img.addEventListener("load", () => scheduleUpdate(true));
+    img.addEventListener("error", () => scheduleUpdate(true));
+  });
+
+  // Observar cambios de tamaño del contenedor.
   if ("ResizeObserver" in window) {
-    const resizeObserver = new ResizeObserver(updateGallery);
+    resizeObserver = new ResizeObserver(() => {
+      scheduleUpdate();
+    });
+
     resizeObserver.observe(gallery);
   } else {
-    window.addEventListener("resize", updateGallery);
-    window.addEventListener("orientationchange", updateGallery);
+    window.addEventListener("resize", scheduleUpdate);
+    window.addEventListener("orientationchange", scheduleUpdate);
   }
 
-  updateGallery();
+  // Primera distribución.
+  updateGallery(true);
+
+  // Función de limpieza para las navegaciones de Astro.
+  return function cleanup() {
+    if (destroyed) {
+      return;
+    }
+
+    destroyed = true;
+
+    if (resizeFrame !== null) {
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = null;
+    }
+
+    if (resizeObserver) {
+      resizeObserver.disconnect();
+    } else {
+      window.removeEventListener("resize", scheduleUpdate);
+      window.removeEventListener("orientationchange", scheduleUpdate);
+    }
+
+    // Restaurar estilos originales.
+    if (originalGalleryStyle === null) {
+      gallery.removeAttribute("style");
+    } else {
+      gallery.setAttribute("style", originalGalleryStyle);
+    }
+
+    originalItemStyles.forEach((style, item) => {
+      if (style === null) {
+        item.removeAttribute("style");
+      } else {
+        item.setAttribute("style", style);
+      }
+    });
+
+    originalImageStyles.forEach((style, img) => {
+      if (style === null) {
+        img.removeAttribute("style");
+      } else {
+        img.setAttribute("style", style);
+      }
+    });
+  };
 }

@@ -1,43 +1,163 @@
+
 ---
-interface Props {
-  items?: string[];
-  label: string;
+interface CV {
+  exposicions?: string[];
+  llibres?: string[];
+  premis?: string[];
+  'col·laboracions'?: string[];
 }
 
-const { items = [], label } = Astro.props;
+interface Props {
+  cv?: CV;
+  lang?: 'ca' | 'es' | 'en';
+}
+
+const { cv = {}, lang = 'ca' } = Astro.props;
+
+const labels = {
+  ca: {
+    exposicions: 'EXPOSICIONS',
+    llibres: 'LLIBRES',
+    premis: 'PREMIS',
+    collaboracions: 'COL·LABORACIONS',
+  },
+  es: {
+    exposicions: 'EXPOSICIONES',
+    llibres: 'LIBROS',
+    premis: 'PREMIOS',
+    collaboracions: 'COLABORACIONES',
+  },
+  en: {
+    exposicions: 'EXHIBITIONS',
+    llibres: 'BOOKS',
+    premis: 'AWARDS',
+    collaboracions: 'COLLABORATIONS',
+  },
+};
+
+const l = labels[lang];
+
+const sections = [
+  {
+    key: 'exposicions',
+    label: l.exposicions,
+    items: cv.exposicions || [],
+  },
+  {
+    key: 'llibres',
+    label: l.llibres,
+    items: cv.llibres || [],
+  },
+  {
+    key: 'premis',
+    label: l.premis,
+    items: cv.premis || [],
+  },
+  {
+    key: 'col·laboracions',
+    label: l.collaboracions,
+    items: cv['col·laboracions'] || [],
+  },
+];
+
+const visibleSections = sections.filter(
+  (section) => section.items.length > 0
+);
 ---
 
-{items.length > 0 && (
-  <div class="expos">
-    <h3 class="expos__label">{label}</h3>
-    <ul class="expos__list">
-      {items.map((item) => (
-        <li class="expos__item">{item}</li>
-      ))}
-    </ul>
+{visibleSections.length > 0 && (
+  <div class="cv">
+    {visibleSections.map((section) => (
+      <details class="cv__section">
+        <summary class="cv__heading">
+          <span>{section.label}</span>
+          <svg
+            class="cv__icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </summary>
+
+        <ul class="cv__list">
+          {section.items.map((item) => (
+            <li>{item}</li>
+          ))}
+        </ul>
+      </details>
+    ))}
   </div>
 )}
 
 <style>
-  .expos {
-    margin: 0 0 2rem;
+  .cv {
+    margin: 0;
   }
-  .expos__label {
-    margin: 0 0 0.5rem;
+
+  .cv__section {
+    margin: 0;
+  }
+
+  .cv__heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+    cursor: pointer;
+    list-style: none;
+    font-size: 0.8rem;
     font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--text-1);
+    text-transform: uppercase;
+    user-select: none;
   }
-  .expos__list {
+
+  .cv__heading::-webkit-details-marker {
+    display: none;
+  }
+
+  .cv__heading::marker {
+    content: '';
+  }
+
+  .cv__heading:hover {
+    color: #6F362B;
+  }
+
+  .cv__icon {
+    flex-shrink: 0;
+    transition: transform 0.25s ease;
+  }
+
+  .cv__section[open] .cv__icon {
+    transform: rotate(180deg);
+  }
+
+  .cv__list {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    margin: 0;
-    padding: 0;
+    gap: 0.4rem;
     list-style: none;
+    margin: 0;
+    padding: 0 0 1rem;
   }
-  .expos__item {
+
+  .cv__list li {
     margin: 0;
     padding: 0;
-    font-size: 0.9rem;
-    color: var(--text-1);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: var(--text-2);
   }
 </style>

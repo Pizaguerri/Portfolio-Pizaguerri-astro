@@ -5,20 +5,15 @@ date: 2023-07-18
 tags:
   - Antropologia Visual
   - Fotografia
-expo:
-  - Escuela Libre Date Cuenta, Ca l’Isidret, 2023
+cv:
+  exposicions:
+    - "Escola Lliure Date Cuenta, Ca l’Isidret, 2023"
+  llibres: []
+  premis: []
+  col·laboracions: []
 draft: false
 ---
----
-title: "Entre l'enyor i la llum"
-date: 2025-09-11
-draft: false
-weight: 20
-tags: 
-  - gravat
-expo:
-  - "Goletart, Mallorca, 2025"
----
+
 
 ## Introducción
 
