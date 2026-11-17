@@ -1,0 +1,43 @@
+---
+interface Props {
+  items?: string[];
+  label: string;
+}
+
+const { items = [], label } = Astro.props;
+---
+
+{items.length > 0 && (
+  <div class="expos">
+    <h3 class="expos__label">{label}</h3>
+    <ul class="expos__list">
+      {items.map((item) => (
+        <li class="expos__item">{item}</li>
+      ))}
+    </ul>
+  </div>
+)}
+
+<style>
+  .expos {
+    margin: 0 0 2rem;
+  }
+  .expos__label {
+    margin: 0 0 0.5rem;
+    font-weight: 700;
+  }
+  .expos__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .expos__item {
+    margin: 0;
+    padding: 0;
+    font-size: 0.9rem;
+    color: var(--text-1);
+  }
+</style>

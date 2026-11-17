@@ -1,0 +1,391 @@
+---
+import "../styles/main.scss";
+import { AstroAnimations } from 'astro-animations';
+import { ClientRouter } from 'astro:transitions';
+import { useTranslations } from '../i18n/utils';
+
+export interface Props {
+    title: string;
+    description?: string;
+    lang?: string;
+}
+
+const { 
+    title, 
+    description = "Fotografia, Antropologia",
+    lang = 'ca'
+} = Astro.props;
+
+const t = useTranslations(lang);
+const isAboutPage = Astro.url.pathname.startsWith('/about');
+---
+
+<!doctype html>
+<html lang={lang}>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="description" content={description} />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{title}</title>
+        <link rel="alternate" type="application/rss+xml" title="Pablo Izaguerri" href="/rss.xml" />
+        <ClientRouter />
+
+        <style is:global>
+            /* =========================================
+               CONTENEDOR MAESTRO
+               ========================================= */
+            .site-container {
+                width: 100%;
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 0 4vw;
+                box-sizing: border-box;
+            }
+
+            .page-content {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background-color: transparent !important;
+                color: var(--text-1);
+            }
+
+            .content-container {
+                width: 100%;
+                max-width: 1000px;
+                margin: 0 auto;
+                padding: 0 2rem;
+                box-sizing: border-box;
+            }
+
+            .prose {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                color: var(--text-1);
+                font-size: 1.1rem;
+                line-height: 1.8;
+                text-align: justify;
+                text-justify: inter-word;
+                hyphens: auto;
+            }
+
+            .prose img {
+                width: 100% !important;
+                max-width: 100% !important;
+                height: auto !important;
+                margin: 2rem 0 !important;
+                border-radius: 0 !important;
+                display: block;
+            }
+
+            #main-header {
+                transition: transform 0.3s ease-in-out;
+                z-index: 1000 !important;
+            }
+            #main-header.header-hidden {
+                transform: translateY(-100%);
+            }
+            html.dark body > header {
+                background-color: rgba(17, 17, 17, 0.99) !important;
+                color: #fafafa !important;
+            }
+            html.light body > header {
+                background-color: rgba(255, 255, 255, 0.99) !important;
+                color: #0a0a0a !important;
+            }
+
+            /* Menú móvil (sin sombreado y por encima de todo) */
+            #menu {
+                position: fixed !important;
+                top: 70px !important;
+                left: 0 !important;
+                right: 0 !important;
+                width: 100vw !important;
+                background-color: rgba(255, 255, 255, 0.99);
+                backdrop-filter: blur(10px);
+                z-index: 999999 !important;
+                padding: 0;
+                display: none;
+                flex-direction: column;
+                gap: 0;
+            }
+            #menu:not(.hidden) {
+                display: flex !important;
+            }
+            #menu ul {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+                width: 100%;
+            }
+            #menu li {
+                width: 100%;
+                border: none;
+            }
+            #menu li a {
+                text-decoration: none;
+                color: inherit;
+                font-weight: 500;
+                padding: 1.5rem 2rem;
+                display: block;
+                width: 100%;
+                text-align: center;
+                transition: background-color 0.2s ease;
+            }
+            #menu li a:hover {
+                background-color: rgba(0, 0, 0, 0.02);
+            }
+            html.dark #menu {
+                background-color: rgba(17, 17, 17, 0.99) !important;
+                color: #fafafa !important;
+            }
+            html.dark #menu li a:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+
+            .card, .card figure, .card > img, .card figure > img,
+            .grid-item, .grid-item img,
+            .post-gallery-item, .post-gallery-item img {
+              border-radius: 0 !important;
+            }
+
+            header h1 {
+                color: var(--text-1) !important;
+                background: none !important;
+                padding: 0 !important;
+            }
+
+            @media (min-width: 769px) {
+                .menu-toggle-btn {
+                    display: none !important;
+                }
+            }
+
+            /* =========================================
+               FOOTER
+               ========================================= */
+            footer {
+                margin-top: 2rem;
+                border-top: 1px solid var(--border);
+                padding-top: 2rem;
+            }
+
+            .footer-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+                width: 100%;
+                max-width: 900px;
+                margin: 0 auto;
+            }
+
+            .footer-col {
+                display: flex;
+                flex-direction: row;
+                align-items: flex-start;
+                width: 100%;
+                padding-bottom: 0.5rem;
+            }
+
+            .footer-col h4 {
+                flex: 0 0 150px;
+                font-size: 0.75rem;
+                font-weight: 500;
+                letter-spacing: 0.1em;
+                color: var(--text-2);
+                margin: 0;
+                padding-top: 0.1rem;
+            }
+
+            .footer-col ul {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: nowrap;
+                gap: 1rem;
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .footer-col li {
+                margin-bottom: 0;
+            }
+
+            .footer-col a {
+                text-decoration: none;
+                color: var(--text-1);
+                font-size: 0.9rem;
+                transition: opacity 0.2s ease;
+                white-space: nowrap;
+            }
+
+            .footer-col a:hover {
+                opacity: 0.6;
+            }
+            
+            .language-switcher a.active {
+                font-weight: 700;
+                text-decoration: underline;
+            }
+
+            .footer-bottom {
+                font-size: 0.85rem;
+                color: var(--text-2);
+                padding-top: 2rem;
+                text-align: center;
+            }
+
+            @media (max-width: 768px) {
+                .footer-col {
+                    flex-direction: column;
+                    gap: 1rem;
+                }
+                .footer-col h4 {
+                    flex: none;
+                }
+                .footer-col ul {
+                    flex-direction: row; 
+                    flex-wrap: wrap;
+                    gap: 0.5rem 1.5rem;
+                    width: 100%;
+                }
+                .footer-col li {
+                    flex: 0 0 calc(33% - 1.5rem); 
+                }
+                .footer-bottom {
+                    padding-top: 2rem;
+                }
+            }
+            
+            /* =========================================
+               TRANSICIONES DE PÁGINA OPTIMIZADAS
+               ========================================= */
+            ::view-transition-group(root),
+            ::view-transition-group(main) {
+              animation: none !important;
+            }
+
+            #main-header {
+              view-transition-name: site-header;
+            }
+            ::view-transition-old(site-header) {
+              display: none;
+            }
+            ::view-transition-new(site-header) {
+              animation: none !important;
+              mix-blend-mode: normal;
+            }
+
+            ::view-transition-old(root) {
+              animation: none !important;
+            }
+            ::view-transition-new(root) {
+              animation: fade-in 0.4s ease-out both !important;
+              mix-blend-mode: normal;
+            }
+
+            @keyframes fade-in {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+        </style>
+    </head>
+    <body>
+        <script is:inline>
+            const setTheme = (isDark) => {
+                document.documentElement.classList.remove("light", "dark");
+                document.documentElement.classList.add(isDark ? "dark" : "light");
+            };
+            const mql = window.matchMedia("(prefers-color-scheme: dark)");
+            setTheme(mql.matches);
+            mql.addEventListener("change", (e) => setTheme(e.matches));
+        </script>
+
+        <header class="site-header" id="main-header">
+            <div class="header-container site-container">
+                <a href="/" class="logo-link">
+                    <img src="/images/logo.png" alt="PABLO IZAGUERRI" class="site-logo" />
+                    <span class="site-title">PABLO IZAGUERRI</span>
+                </a>
+
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="/indice">{t('nav.index')}</a></li>
+                        <li><a href="/about">{t('nav.about')}</a></li>
+                    </ul>
+                </nav>
+
+                <button id="menu-toggle" class="menu-toggle-btn" aria-expanded="false" aria-label={t('menu')}>
+                    <svg class="icon-open" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                    <svg class="icon-close" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <slot />
+        </main>
+
+        <footer>
+            <div class="site-container" style="padding-bottom: 4rem;">
+                <div class="footer-grid">
+                    {isAboutPage && (
+                    <div class="footer-col">
+                        <h4>{t('footer.lang')}</h4>
+                        <ul class="language-switcher" id="language-switcher">
+                            <li><a href="/about" data-lang="ca" class={lang === 'ca' ? 'active' : ''}>CA</a></li>
+                            <li><a href="/about/es" data-lang="es" class={lang === 'es' ? 'active' : ''}>ES</a></li>
+                            <li><a href="/about/en" data-lang="en" class={lang === 'en' ? 'active' : ''}>EN</a></li>
+                        </ul>
+                    </div>
+                    )}
+                    <div class="footer-col">
+                        <h4>{t('footer.index')}</h4>
+                        <ul>
+                            <li><a href="/indice">{t('nav.home')}</a></li>
+                            <li><a href="/selected">{t('nav.selected')}</a></li>
+                            <li><a href="/proyectos">{t('nav.projects')}</a></li>
+                            <li><a href="/blog">{t('nav.blog')}</a></li>
+                            <li><a href="/about">{t('nav.about.footer')}</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h4>{t('footer.social')}</h4>
+                        <ul>
+                            <li><a href="mailto:hola@pabloizaguerri.org">Email</a></li>
+                            <li><a href="https://instagram.com/pizaguerri" target="_blank">Instagram</a></li>
+                            <li><a href="https://mastodon.social/@Pizzaguerri" target="_blank">Mastodon</a></li>
+                            <li><a href="https://video.anartist.org/a/pizzaguerri/video-channels" target="_blank">Anartist</a></li>
+                            <li><a href="https://www.youtube.com/@Pizzaguerri" target="_blank">Youtube</a></li>
+                            <li><a href="https://codeberg.org/Pizaguerri" target="_blank">Codeberg</a></li>
+                            <li><a href="https://www.last.fm/user/P91870" target="_blank">Last.fm</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="footer-bottom">
+                    <p>&copy; {new Date().getFullYear()} {t('copyrightNotice')}</p>
+                </div>
+            </div>
+        </footer>
+
+        <div id="menu" class="hidden">
+            <ul>
+                <li><a href="/indice">{t('nav.index')}</a></li>
+                <li><a href="/about">{t('nav.about')}</a></li>
+            </ul>
+        </div>
+
+        <script>
+            import "../scripts/main.js";
+        </script>
+
+        <AstroAnimations />
+    </body>
+</html>

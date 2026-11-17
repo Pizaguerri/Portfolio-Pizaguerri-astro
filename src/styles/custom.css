@@ -1,0 +1,961 @@
+/* =========================================================
+   BODY
+   ========================================================= */
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+header {
+  position: relative;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: var(--surface-1);
+  backdrop-filter: blur(10px);
+  color: var(--text-1);
+  overflow: visible !important;
+}
+
+header a,
+.site-title {
+  color: inherit;
+  text-decoration: none;
+}
+
+header a:hover {
+  opacity: 0.9;
+}
+
+.site-header {
+  margin-bottom: 1rem;
+}
+
+.header-container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  position: relative;
+}
+
+/* Logo */
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.site-logo {
+  border-radius: 50%;
+  max-height: 40px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.site-title {
+  white-space: nowrap;
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+/* Navegación desktop */
+.main-nav {
+  display: flex;
+  justify-content: flex-end;
+  flex-grow: 1;
+}
+
+.main-nav ul {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+}
+
+.main-nav a {
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.main-nav a:hover {
+  opacity: 0.7;
+}
+
+.main-nav a.active,
+#menu a.active {
+  font-weight: 700;
+}
+
+/* Botón hamburguesa */
+.menu-toggle-btn {
+  display: none;
+  flex: 0 0 auto;
+  min-width: 44px;
+  min-height: 44px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  padding: 0.5rem;
+  font-size: 1.5rem;
+  margin-left: auto;
+  z-index: 1100;
+  position: relative;
+  isolation: isolate;
+}
+
+.menu-toggle-btn svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+/* Iconos del botón según estado */
+.menu-toggle-btn .icon-close {
+  display: none;
+}
+
+.menu-toggle-btn[aria-expanded="true"] .icon-open {
+  display: none;
+}
+
+.menu-toggle-btn[aria-expanded="true"] .icon-close {
+  display: block;
+}
+
+/* Menú móvil */
+#menu {
+  position: fixed !important;
+  top: 70px !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100vw !important;
+  background-color: var(--surface-1) !important; /* Usa la variable del tema */
+  color: var(--text-1) !important;
+  backdrop-filter: blur(10px);
+  z-index: 999999 !important;
+  padding: 0;
+  display: none;
+  flex-direction: column;
+  gap: 0;
+}
+
+#menu:not(.hidden) {
+  display: flex !important;
+}
+
+#menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+}
+
+#menu li {
+  width: 100%;
+  border: none;
+}
+
+#menu li a {
+  text-decoration: none;
+  color: inherit !important;
+  font-weight: 500;
+  padding: 1.5rem 2rem;
+  display: block;
+  width: 100%;
+  text-align: center;
+  transition: background-color 0.2s ease;
+}
+
+#menu li a:hover {
+  background-color: var(--surface-2) !important; /* Usa la variable del tema */
+}
+
+/* =========================================================
+   HEADER — RESPONSIVE
+   ========================================================= */
+@media (max-width: 768px) {
+  .header-container {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding-inline: 1rem;
+  }
+
+  .logo-link {
+    grid-column: 2;
+  }
+
+  .main-nav {
+    display: none !important;
+  }
+
+  .menu-toggle-btn {
+    display: block !important;
+    grid-column: 3;
+    justify-self: end;
+    margin-left: 0;
+  }
+}
+
+@media (min-width: 769px) {
+  .main-nav {
+    display: flex !important;
+  }
+
+  .menu-toggle-btn,
+  #menu {
+    display: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .site-logo {
+    max-height: 32px;
+  }
+}
+
+/* =========================================================
+   TYPOGRAPHY / GENERAL LAYOUT
+   ========================================================= */
+hgroup h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+header,
+.blog-list,
+.entry-card,
+.entry-title,
+hgroup {
+  position: relative;
+  z-index: 1;
+}
+
+/* Forzar que todos los títulos de sección tengan el mismo tamaño */
+.selected-header h1,
+.index-section-title {
+  font-size: 1.5rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.1em;
+}
+
+/* =========================================================
+   HOVER — GRAYSCALE
+   ========================================================= */
+.slide-image-real,
+.latest-post-img,
+.card figure > img {
+  filter: grayscale(0%);
+  transition: filter 0.8s ease;
+}
+
+.slide-image-real:hover,
+.latest-post-img:hover,
+.card figure > img:hover {
+  filter: grayscale(100%);
+}
+
+/* =========================================================
+   PROJECTS — GRID
+   ========================================================= */
+section.galleries {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3rem 2rem;
+  width: 100%;
+}
+
+.card > figure {
+  border-radius: 0 !important;
+  overflow: hidden;
+  width: 100%;
+}
+
+.card > img,
+.card figure > img {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: filter 0.8s ease;
+}
+
+.card > div {
+  padding: 0.5rem 0 0;
+  gap: 0;
+}
+
+.card > div > h2 {
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-top: 0.75rem;
+  color: inherit;
+}
+
+/* =========================================================
+   PROJECTS / BLOG — EDITORIAL GRID
+   ========================================================= */
+.post-featured-wrapper {
+  max-width: 900px;
+  margin-inline: auto;
+}
+
+/* =========================================================
+   ABOUT
+   ========================================================= */
+.about-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.profile-pic {
+  width: 150px !important;
+  height: 150px !important;
+  max-width: 150px !important;
+  max-height: 150px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  display: block !important;
+  margin: 0 auto 2rem auto !important;
+  transition: transform 0.3s ease;
+}
+
+.profile-pic:hover {
+  transform: scale(1.02);
+}
+
+.about-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin: 3rem 0;
+  clear: both;
+}
+
+.about-gallery img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 0px;
+  transition: transform 0.3s ease;
+}
+
+.about-gallery img:hover {
+  transform: translateY(-4px);
+}
+
+/* =========================================================
+   HOME — FILAS DE SCROLL
+   ========================================================= */
+.home-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  width: 100%;
+}
+
+.home-row {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+}
+
+.home-row-scroll {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+
+.home-row-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.home-row-scroll img {
+  height: 340px;
+  width: auto;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  object-fit: cover;
+  display: inline-block;
+}
+
+.home-row-title {
+  display: block;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 2.5em;
+  margin-top: 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--text-2);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.home-row:hover .home-row-title {
+  opacity: 1;
+}
+
+/* =========================================================
+   INDEX — SECTION HEADINGS
+   ========================================================= */
+.index-section-title {
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 500;
+  margin: 1.5rem auto 1rem;
+}
+
+.index-section-title:first-of-type {
+  margin-top: 1rem;
+}
+
+/* =========================================================
+   GALERÍAS UNIFICADAS (Selected, Proyectos, Editorial)
+   ========================================================= */
+.selected-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 0;
+  padding-bottom: 2rem;
+  margin-bottom: 0;
+}
+
+.selected-header h1 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align: center;
+  color: var(--text-1);
+  margin: 0;
+}
+
+.justified-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+  gap: 1.5rem;
+  align-items: start;
+  width: 100%;
+}
+
+.grid-item { 
+  display: block; 
+  width: 100%; 
+  overflow: hidden; 
+  cursor: pointer;
+}
+
+.grid-item img { 
+  width: 100%; 
+  height: auto; 
+  display: block; 
+  transition: filter 0.3s ease; 
+}
+
+@media (min-width: 769px) {
+  .grid-item:hover img { 
+    filter: grayscale(100%); 
+  }
+  .editorial-item:hover .editorial-image img {
+    filter: grayscale(100%);
+  }
+}
+/* =========================================================
+   LIGHTBOX — CAPTION
+   ========================================================= */
+.pswp__dynamic-caption {
+  text-align: center;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fff;
+  opacity: 0.75;
+}
+
+.pswp__dynamic-caption--below {
+  text-align: center;
+  width: 100%;
+  max-width: none;
+  padding: 0.75rem 0 0;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   LIGHTBOX — IMAGE PROTECTION
+   ========================================================= */
+.pswp__item img,
+.gallery-item img {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+}
+
+
+/* =========================================================
+   LIGHTBOX — BACKGROUND / BLUR
+   ========================================================= */
+.pswp__bg {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.pswp {
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  /* Sin transición de backdrop-filter, solo opacidad controlada por JS */
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+footer .language-selector {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+footer .language-selector a {
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+footer .language-selector a.active {
+  font-weight: bold;
+  background-color: var(--surface-2);
+}
+
+footer .language-selector a:hover {
+  background-color: var(--surface-2);
+}
+
+footer .social-icons {
+  display: none;
+}
+
+body.about-page footer .social-icons {
+  display: flex;
+}
+
+body.home footer .language-selector {
+  display: none;
+}
+
+body.home footer section:last-of-type {
+  padding: 0.5rem !important;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 768px) {
+  section.galleries {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .about-gallery {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .about-gallery img {
+    height: 250px;
+  }
+
+  .home-row-title {
+    opacity: 1;
+    min-height: 2.5em;
+    margin-top: 1rem;
+    font-size: 1rem;
+  }
+
+  .home-row-scroll img {
+    height: auto;
+    width: 82vw;
+    flex: 0 0 82vw;
+  }
+
+  .gallery-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .gallery-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========== POST GALLERY — EDITORIAL MOSAIC ========== */
+.post-gallery {
+  width: 100%;
+  margin: 5rem auto 4rem;
+}
+
+.post-gallery-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 4rem;
+}
+
+.post-gallery-line {
+  display: block;
+  width: 50%;
+  max-width: 600px;
+  height: 1px;
+  margin-bottom: 1.75rem;
+  background: var(--border);
+}
+
+.post-gallery-heading h2 {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+.post-gallery-block {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.post-gallery-block-left {
+  grid-template-columns: 2fr 1fr;
+}
+
+.post-gallery-block-right {
+  grid-template-columns: 1fr 2fr;
+}
+
+.post-gallery-block > .post-gallery-item.is-large {
+  grid-row: 1 / 3;
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: auto;
+}
+
+.post-gallery-block-left > .post-gallery-item.is-large {
+  grid-column: 1;
+}
+
+.post-gallery-block-right > .post-gallery-item.is-large {
+  grid-column: 2;
+}
+
+.post-gallery-block > .post-gallery-item.is-small-top {
+  grid-row: 1;
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: auto;
+}
+
+.post-gallery-block > .post-gallery-item.is-small-bottom {
+  grid-row: 2;
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: auto;
+}
+
+.post-gallery-block-left > .post-gallery-item.is-small-top,
+.post-gallery-block-left > .post-gallery-item.is-small-bottom {
+  grid-column: 2;
+}
+
+.post-gallery-block-right > .post-gallery-item.is-small-top,
+.post-gallery-block-right > .post-gallery-item.is-small-bottom {
+  grid-column: 1;
+}
+
+.post-gallery-remainder {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.post-gallery-remainder-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.post-gallery-remainder-1 {
+  grid-template-columns: 2fr 1fr;
+}
+
+.post-gallery-remainder-1 .post-gallery-item {
+  grid-column: 1;
+}
+
+.post-gallery-item {
+  position: relative;
+  display: block;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  aspect-ratio: 3 / 2;
+  background: var(--surface-2);
+  text-decoration: none;
+  color: inherit;
+}
+
+.post-gallery-item img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  margin: 0;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.post-gallery-item .pswp-caption-content {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 1.5rem 1rem 1rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  color: #fff;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.post-gallery-item:hover .pswp-caption-content {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .post-gallery { margin-top: 3rem; }
+  .post-gallery-heading { margin-bottom: 2.5rem; }
+  .post-gallery-line { width: 70%; margin-bottom: 1.25rem; }
+
+  .post-gallery-remainder,
+  .post-gallery-remainder-1,
+  .post-gallery-remainder-2 {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    margin-bottom: .75rem;
+  }
+
+  .post-gallery-remainder .post-gallery-item {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+  }
+
+  .post-gallery-block,
+  .post-gallery-block-left,
+  .post-gallery-block-right {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .post-gallery-block > .post-gallery-item {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
+  }
+
+  .post-gallery-item .pswp-caption-content {
+    opacity: 1;
+  }
+}
+
+/* ---------------------------------
+   PRINT
+   --------------------------------- */
+.print-request-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: fit-content;
+  margin: 1.5rem auto 2rem;
+  padding: 0 0 0.35rem;
+  color: var(--text-1);
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  text-decoration: none !important;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.print-request-button::after {
+  content: "→";
+  display: inline-block;
+  border: 0;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.print-request-button:hover {
+  color: var(--link);
+  border-bottom-color: var(--link);
+  text-decoration: none !important;
+}
+
+.print-request-button:hover::after {
+  transform: translateX(0.25rem);
+}
+
+/* =========================================================
+   PROTECCIÓN DE IMÁGENES
+   ========================================================= */
+img {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  pointer-events: auto;
+}
+
+/* =========================================================
+   ANIMACIONES PERSONALIZADAS
+   ========================================================= */
+/* Hacemos que la transición sea más lenta y suave */
+[data-animate] {
+  transition-duration: 800ms !important; /* 1 segundo */
+  transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1) !important; /* Curva suave */
+}
+
+/* Si quieres que el deslizamiento sea más pronunciado, aumenta el translateY */
+[data-animate="slide-up"] {
+  --animate-translate-y: 40px; /* Ajusta a tu gusto (por defecto suele ser 20px) */
+}
+
+/* =========================================================
+   NEGRITAS EN AZUL
+   ========================================================= */
+    .prose strong, .prose b {
+        color: var(--bold);
+        font-weight: 600;
+    }
+
+    /* =========================================================
+       LIGHTBOX — OCULTAR BOTONES NATIVOS (excepto los nuestros)
+       ========================================================= */
+    .pswp__button:not(.pswp__button--custom-prev-arrow):not(.pswp__button--custom-next-arrow),
+    .pswp__counter,
+    .pswp__preloader {
+      display: none !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    
+    /* =========================================
+       LIGHTBOX - FLECHAS PERSONALIZADAS
+       ========================================= */
+    .pswp__button--custom-prev-arrow,
+    .pswp__button--custom-next-arrow {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 999999;
+      width: 48px;
+      height: 48px;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      background: transparent; /* Fondo transparente */
+      border: none;
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.6);
+      transition: color 0.2s ease, transform 0.2s ease;
+      padding: 0;
+    }
+    
+    .pswp__button--custom-prev-arrow {
+      left: 2rem;
+    }
+    .pswp__button--custom-next-arrow {
+      right: 2rem;
+    }
+    
+    .pswp__button--custom-prev-arrow:hover,
+    .pswp__button--custom-next-arrow:hover {
+      color: rgba(255, 255, 255, 1);
+      transform: translateY(-50%) scale(1.1);
+    }
+    
+    /* =========================================
+       AJUSTE PARA MÓVIL: SIN FONDO REDONDEADO
+       ========================================= */
+    @media (max-width: 768px) {
+      .pswp__button--custom-prev-arrow,
+      .pswp__button--custom-next-arrow {
+        width: 36px; /* Un poco más pequeño */
+        height: 36px;
+        /* Eliminamos background y border-radius */
+        background: transparent; 
+        border-radius: 0;
+      }
+      .pswp__button--custom-prev-arrow {
+        left: 0.5rem;
+      }
+      .pswp__button--custom-next-arrow {
+        right: 0.5rem;
+      }
+    }

@@ -1,0 +1,81 @@
+/* =========================================
+   INTER (Variable Font instalada manualmente)
+   ========================================= */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900; /* Rango de pesos (variable) */
+  font-display: swap;
+  src: url('/fonts/inter-latin-standard-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900; /* Rango de pesos (variable) */
+  font-display: swap;
+  src: url('/fonts/inter-latin-standard-italic.woff2') format('woff2');
+}
+
+/* =========================================
+   APLICACIÓN DE FUENTES
+   ========================================= */
+
+/* 1. Fuente base para todo el cuerpo */
+body,
+.site-title,
+.main-nav a,
+#menu a,
+hgroup h1,
+hgroup h2,
+hgroup p,
+.card > div > h2,
+.home-row-title,
+.index-section-title,
+.selected-header h1,
+.cover-overlay h1,
+.cover-overlay p,
+.editorial-text h3,
+.editorial-tag,
+.editorial-meta,
+.footer-col h4,
+.footer-bottom,
+.print-request-button,
+.prose {
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* 2. Si quieres usar Bodoni Moda para los títulos, configúrala así */
+.project-sidebar h1,
+.project-header h1 {
+  /* Descomenta la siguiente línea si has descargado Bodoni Moda */
+  /* font-family: 'Bodoni Moda', serif; */ 
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* 3. Ajustes de pesos */
+.site-title,
+.main-nav a,
+#menu a,
+hgroup h1,
+hgroup h2,
+hgroup p,
+.card > div > h2,
+.home-row-title,
+.index-section-title,
+.selected-header h1,
+.cover-overlay h1,
+.cover-overlay p,
+.editorial-text h3,
+.editorial-tag,
+.footer-col h4 {
+  font-weight: 500;
+}
+
+.editorial-meta,
+.footer-bottom,
+.print-request-button,
+.copyright {
+  font-weight: 400;
+}

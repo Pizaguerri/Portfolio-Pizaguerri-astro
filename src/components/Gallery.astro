@@ -1,0 +1,48 @@
+---
+import { Image } from 'astro:assets';
+
+export interface Props {
+  images: any[];
+}
+
+const { images } = Astro.props;
+
+const chunks = [];
+for (let i = 0; i < images.length; i += 3) {
+  chunks.push(images.slice(i, i + 3));
+}
+---
+
+<div class="post-gallery" id="post-gallery">
+  <div class="post-gallery-heading">
+    <div class="post-gallery-line"></div>
+  </div>
+
+  {chunks.map((chunk, index) => {
+    if (chunk.length === 3) {
+      return (
+        <div class={`post-gallery-block post-gallery-block-${index % 2 === 0 ? 'left' : 'right'}`}>
+          <a href={chunk[0].src} class="post-gallery-item is-large" data-pswp-width={chunk[0].width} data-pswp-height={chunk[0].height}>
+            <Image src={chunk[0]} alt="" widths={[600, 1200]} sizes="(max-width: 800px) 100vw, 60vw" />
+          </a>
+          <a href={chunk[1].src} class="post-gallery-item is-small-top" data-pswp-width={chunk[1].width} data-pswp-height={chunk[1].height}>
+            <Image src={chunk[1]} alt="" widths={[300, 600]} sizes="(max-width: 800px) 100vw, 40vw" />
+          </a>
+          <a href={chunk[2].src} class="post-gallery-item is-small-bottom" data-pswp-width={chunk[2].width} data-pswp-height={chunk[2].height}>
+            <Image src={chunk[2]} alt="" widths={[300, 600]} sizes="(max-width: 800px) 100vw, 40vw" />
+          </a>
+        </div>
+      );
+    }
+    
+    return (
+      <div class={`post-gallery-remainder post-gallery-remainder-${chunk.length}`}>
+        {chunk.map((img) => (
+          <a href={img.src} class="post-gallery-item" data-pswp-width={img.width} data-pswp-height={img.height}>
+            <Image src={img} alt="" widths={[600, 1200]} sizes="(max-width: 800px) 100vw, 50vw" />
+          </a>
+        ))}
+      </div>
+    );
+  })}
+</div>
