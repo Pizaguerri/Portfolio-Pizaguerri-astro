@@ -1,0 +1,126 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { Image } from 'astro:assets';
+import { Animate } from 'astro-animations';
+
+const projects = (await getCollection('projects')).filter(p => p.id.endsWith('.ca')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const projectItems = projects.map((p) => {
+  const slug = p.id.replace('.ca', '');
+  const images = import.meta.glob('../../content/projects/**/*.{jpg,jpeg,png,webp}', { eager: true });
+  const imgs = Object.keys(images).filter(k => k.includes(`/projects/${slug}/`)).map(k => images[k].default);
+  imgs.sort((a, b) => a.src.includes('cover') ? -1 : (b.src.includes('cover') ? 1 : 0));
+  const dateStr = p.data.date.toLocaleDateString('ca-ES', { month: 'long', year: 'numeric' });
+  return { 
+    ...p, 
+    slug, 
+    image: imgs[0], 
+    dateStr: dateStr.charAt(0).toUpperCase() + dateStr.slice(1), 
+    tag: 'Projecte',
+    tagClass: 'tag-projecte'
+  };
+});
+
+const posts = (await getCollection('blog')).filter(p => p.id.endsWith('.ca')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const postItems = posts.map((p) => {
+  const slug = p.id.replace('.ca', '');
+  const images = import.meta.glob('../../content/blog/**/*.{jpg,jpeg,png,webp}', { eager: true });
+  const imgs = Object.keys(images).filter(k => k.includes(`/blog/${slug}/`)).map(k => images[k].default);
+  imgs.sort((a, b) => a.src.includes('cover') ? -1 : (b.src.includes('cover') ? 1 : 0));
+  const dateStr = p.data.date.toLocaleDateString('ca-ES', { month: 'long', year: 'numeric' });
+  return { 
+    ...p, 
+    slug, 
+    image: imgs[0], 
+    dateStr: dateStr.charAt(0).toUpperCase() + dateStr.slice(1), 
+    tag: 'Editorial',
+    tagClass: 'tag-editorial'
+  };
+});
+
+const allItems = [...projectItems, ...postItems].sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<BaseLayout title="Index | Pablo Izaguerri">
+  <div class="site-container" style="padding-top: 0rem;">
+    <div class="editorial-list">
+      {allItems.map((item, index) => (
+        <Animate type="fade" direction="up" duration={800} easing="ease-out-5">
+          <a href={item.tag === 'Projecte' ? `/proyectos/${item.slug}` : `/blog/${item.slug}`} class={`editorial-item ${index % 2 !== 0 ? 'reverse' : ''}`}>
+            <div class="editorial-image">
+              {item.image && <Image src={item.image} alt={item.data.title} widths={[400, 800]} />}
+            </div>
+            <div class="editorial-text">
+              <span class={`editorial-tag ${item.tagClass}`}>{item.tag}</span>
+              <h3>{item.data.title}</h3>
+              <p class="editorial-meta">{item.dateStr}</p>
+              <p class="editorial-summary">{item.data.description}</p>
+            </div>
+          </a>
+        </Animate>
+      ))}
+    </div>
+  </div>
+</BaseLayout>
+
+<style is:global>
+  .editorial-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5rem;
+    margin-top: 2rem;
+    margin-bottom: 4rem;
+  }
+  .editorial-item {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 3rem;
+    text-decoration: none;
+    color: inherit !important;
+    align-items: start;
+    transition: opacity 0.3s ease;
+  }
+  .editorial-item.reverse {
+    grid-template-columns: 1fr 350px;
+  }
+  .editorial-item.reverse .editorial-image { order: 2; }
+  .editorial-item.reverse .editorial-text { order: 1; }
+  .editorial-item:hover { opacity: 0.8; }
+  .editorial-image { width: 100%; overflow: hidden; }
+  .editorial-image img { width: 100%; height: auto; display: block; object-fit: cover; border-radius: 0; }
+  .editorial-text { display: flex; flex-direction: column; justify-content: flex-start; }
+  
+  /* Estilos base para el tag */
+  .editorial-tag {
+    display: inline-block; 
+    font-size: 0.7rem; 
+    font-weight: 600; 
+    text-transform: uppercase; 
+    letter-spacing: 0.15em;
+    margin-bottom: 0.75rem; 
+    padding: 0.25rem 0.5rem; 
+    width: fit-content;
+    background-color: transparent !important; /* Sin fondo */
+    border: 1px solid; /* El color del borde se define en las clases específicas */
+  }
+
+  /* Colores específicos (solo borde y texto) */
+  .tag-projecte {
+    color: #1e3a8a !important; /* Texto azul marino */
+    border-color: #1e3a8a !important; /* Borde azul marino */
+  }
+  
+  .tag-editorial {
+    color: #d97706 !important; /* Texto ámbar oscuro */
+    border-color: #d97706 !important; /* Borde ámbar oscuro */
+  }
+
+  .editorial-text h3 { font-size: 1.3rem; font-weight: 600; margin: 0 0 0.5rem 0; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-1) !important; text-decoration: none !important; }
+  .editorial-meta { font-size: 0.9rem; color: var(--text-2) !important; margin-bottom: 1rem; text-decoration: none !important; }
+  .editorial-summary { font-size: 1rem; line-height: 1.6; color: var(--text-1) !important; text-decoration: none !important; margin: 0; }
+
+  @media (max-width: 768px) {
+    .editorial-item, .editorial-item.reverse { grid-template-columns: 1fr; gap: 1rem; }
+    .editorial-item.reverse .editorial-image, .editorial-item.reverse .editorial-text { order: 0; }
+  }
+</style>

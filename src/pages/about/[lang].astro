@@ -1,0 +1,39 @@
+---
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { Image } from 'astro:assets';
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'es' } },
+    { params: { lang: 'en' } },
+  ];
+}
+
+const { lang } = Astro.params;
+
+const aboutEntry = await getEntry('about', `index.${lang}`);
+
+if (!aboutEntry) {
+  throw new Error(`No s'ha trobat el fitxer index.${lang}.md`);
+}
+
+const { Content } = await render(aboutEntry);
+---
+
+<BaseLayout title="About | Pablo Izaguerri" lang={lang}>
+  <div class="content-container" style="padding-top: 4rem; padding-bottom: 4rem;">
+    
+    <div style="display: flex; justify-content: center; margin-bottom: 3rem;">
+      <img src="/images/logo.png" alt="Foto de Pablo Izaguerri" style="width: 250px; height: 250px; border-radius: 50%; object-fit: cover; display: block;" />
+    </div>
+
+    <div class="prose">
+      <Content 
+        components={{ 
+          img: (props) => <Image {...props} widths={[800, 1200]} sizes="(max-width: 800px) 100vw, 800px" style="width: 100%; height: auto; border-radius: 0; margin: 2rem 0;" />
+        }} 
+      />
+    </div>
+  </div>
+</BaseLayout>

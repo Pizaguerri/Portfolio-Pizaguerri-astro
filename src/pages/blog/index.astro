@@ -1,0 +1,41 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { Image } from 'astro:assets';
+
+const posts = (await getCollection('blog'))
+  .filter(p => p.id.endsWith('.ca'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const postsWithImages = posts.map((post) => {
+  const slug = post.id.replace('.ca', '');
+  const images = import.meta.glob('../../content/blog/**/*.{jpg,jpeg,png,webp}', { eager: true });
+  const imgs = Object.keys(images).filter(k => k.includes(`/blog/${slug}/`)).map(k => images[k].default);
+  imgs.sort((a, b) => a.src.includes('cover') ? -1 : (b.src.includes('cover') ? 1 : 0));
+  return { ...post, slug, image: imgs[0] };
+});
+---
+
+<BaseLayout title="Editorial | Pablo Izaguerri">
+  <div class="site-container" style="padding-top: 0; padding-bottom: 4rem;">
+    
+    <header class="selected-header">
+      <h1>Editorial</h1>
+    </header>
+
+    <div class="justified-grid">
+      {postsWithImages.map((post) => (
+        <a href={`/blog/${post.slug}`} class="grid-item">
+          {post.image && (
+            <Image 
+              src={post.image} 
+              alt={post.data.title} 
+              widths={[400, 800, 1200]} 
+              sizes="(max-width: 1200px) 50vw, 33vw" 
+            />
+          )}
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>
