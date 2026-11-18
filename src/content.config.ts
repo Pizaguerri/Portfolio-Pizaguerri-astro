@@ -2,12 +2,11 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
-// Categorías del CV
+// Categorías comunes del CV
 const cvSchema = z.object({
   exposicions: z.array(z.string()).optional().default([]),
-  llibres: z.array(z.string()).optional().default([]),
+  publicacions_i_col·laboracions: z.array(z.string()).optional().default([]),
   premis: z.array(z.string()).optional().default([]),
-  'col·laboracions': z.array(z.string()).optional().default([]),
 });
 
 // Campos comunes de proyectos y blog
@@ -24,9 +23,8 @@ const portfolioSchema = z.object({
 const portfolioWithCvSchema = portfolioSchema.extend({
   cv: cvSchema.default({
     exposicions: [],
-    llibres: [],
+    publicacions_i_col·laboracions: [],
     premis: [],
-    'col·laboracions': [],
   }),
 });
 
@@ -74,9 +72,8 @@ const about = defineCollection({
   schema: z.object({
     title: z.string().optional(),
     exposicions: z.array(z.string()).optional().default([]),
-    llibres: z.array(z.string()).optional().default([]),
+    publicacions_i_col·laboracions: z.array(z.string()).optional().default([]),
     premis: z.array(z.string()).optional().default([]),
-    'col·laboracions': z.array(z.string()).optional().default([]),
   }).passthrough(),
 });
 

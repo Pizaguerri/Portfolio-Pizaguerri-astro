@@ -1,3 +1,4 @@
+
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -12,14 +13,19 @@ export async function getStaticPaths() {
   return posts
     .filter((post) => post.id.endsWith('.ca'))
     .map((post) => ({
-      params: { slug: post.id.replace(/\.ca$/, '') },
+      params: { slug: post.id.replace(/\.ca$/, '').trim() },
       props: { post },
     }));
 }
 
 const { post } = Astro.props;
 const { Content } = await render(post);
-const slug = post.id.replace(/\.ca$/, '');
+
+const slug = post.id
+  .replace(/\.ca$/, '')
+  .trim()
+  .toLowerCase();
+
 const englishSummary = post.data.summary_en?.trim();
 
 const allImages = import.meta.glob(
@@ -27,42 +33,44 @@ const allImages = import.meta.glob(
   { eager: true }
 );
 
+const isCover = (path) => {
+  const fileName = path.split('/').pop().toLowerCase();
+
+  return [
+    'cover.jpg',
+    'cover.jpeg',
+    'cover.png',
+    'cover.webp',
+  ].includes(fileName);
+};
+
 const postImagePaths = Object.keys(allImages).filter((path) =>
-  path.includes(`/blog/${slug}/`)
+  path.toLowerCase().includes(`/blog/${slug}/`)
 );
+
+const coverPath = postImagePaths.find(isCover);
 
 const galleryPaths = postImagePaths
-  .filter((path) => !path.toLowerCase().includes('cover.jpg'))
+  .filter((path) => !isCover(path))
   .sort();
 
-const coverPath = postImagePaths.find((path) =>
-  path.toLowerCase().includes('cover.jpg')
-);
-
-let coverImage = null;
-
-if (coverPath) {
-  const src = allImages[coverPath].default;
+const optimizeImage = async (path) => {
+  const src = allImages[path].default;
   const optimized = await getImage({ src });
 
-  coverImage = {
+  return {
     src,
     width: optimized.attributes.width,
     height: optimized.attributes.height,
   };
-}
+};
+
+const coverImage = coverPath
+  ? await optimizeImage(coverPath)
+  : null;
 
 const galleryImages = await Promise.all(
-  galleryPaths.map(async (path) => {
-    const src = allImages[path].default;
-    const optimized = await getImage({ src });
-
-    return {
-      src,
-      width: optimized.attributes.width,
-      height: optimized.attributes.height,
-    };
-  })
+  galleryPaths.map(optimizeImage)
 );
 
 const sliderImages = coverImage
@@ -75,7 +83,11 @@ const sliderImages = coverImage
   description={post.data.description}
 >
   <div id="project-gallery-container">
-    <div class="slider-container" id="slider-container">
+    <div
+      class="slider-container"
+      id="slider-container"
+      data-pswp-active="true"
+    >
       <div class="slider-track" id="slider-track">
         {sliderImages.map((img, index) => (
           <a
@@ -83,7 +95,6 @@ const sliderImages = coverImage
             class="slider-item"
             data-pswp-width={img.width}
             data-pswp-height={img.height}
-            data-pswp-active="true"
           >
             <Image
               src={img.src}
@@ -100,6 +111,7 @@ const sliderImages = coverImage
     <div
       class="mosaic-container"
       id="mosaic-container"
+      data-pswp-active="false"
       style="display: none;"
     >
       <div class="site-container mosaic-inner">
@@ -113,7 +125,6 @@ const sliderImages = coverImage
               class="post-gallery-item gallery-item blog-mosaic-item"
               data-pswp-width={img.width}
               data-pswp-height={img.height}
-              data-pswp-active="false"
             >
               <Image
                 src={img.src}
@@ -393,110 +404,111 @@ const sliderImages = coverImage
 </style>
 
 <script>
-  import { initJustifiedGallery } from '../../scripts/gallery.js';
 
-  let cleanupGallery = null;
-  let toggleHandler = null;
+import { initJustifiedGallery } from '../../scripts/gallery.js';
 
-  function setActiveView(isMosaic) {
-    const sliderContainer = document.getElementById('slider-container');
+let cleanupGallery = null;
+let toggleHandler = null;
+
+function setActiveView(isMosaic) {
+  const sliderContainer = document.getElementById('slider-container');
+  const mosaicContainer = document.getElementById('mosaic-container');
+  const iconGrid = document.getElementById('icon-grid');
+  const iconSlider = document.getElementById('icon-slider');
+  const toggleBtn = document.getElementById('toggle-gallery-btn');
+
+  if (
+    !sliderContainer ||
+    !mosaicContainer ||
+    !iconGrid ||
+    !iconSlider ||
+    !toggleBtn
+  ) {
+    return;
+  }
+
+  sliderContainer.style.display = isMosaic ? 'none' : 'block';
+  mosaicContainer.style.display = isMosaic ? 'block' : 'none';
+
+  sliderContainer.dataset.pswpActive = String(!isMosaic);
+  mosaicContainer.dataset.pswpActive = String(isMosaic);
+
+  iconGrid.style.display = isMosaic ? 'none' : 'block';
+  iconSlider.style.display = isMosaic ? 'block' : 'none';
+
+  toggleBtn.setAttribute('aria-pressed', String(isMosaic));
+
+  cleanupGallery?.();
+  cleanupGallery = null;
+
+  if (isMosaic) {
+    const gallery = document.getElementById('blog-mosaic-gallery');
+
+    if (gallery) {
+      cleanupGallery = initJustifiedGallery(gallery, {
+        itemSelector: '.gallery-item',
+        targetRowHeight: 288,
+        spacing: 8,
+        heightTolerance: 0.25,
+      });
+    }
+  }
+}
+
+function initBlogGallery() {
+  // Evita que este script se ejecute en las páginas de proyectos.
+  const gallery = document.getElementById('blog-mosaic-gallery');
+
+  if (!gallery) return;
+
+  cleanupGallery?.();
+  cleanupGallery = null;
+
+  const toggleBtn = document.getElementById('toggle-gallery-btn');
+
+  if (!toggleBtn) return;
+
+  if (toggleHandler) {
+    toggleBtn.removeEventListener('click', toggleHandler);
+  }
+
+  toggleHandler = () => {
     const mosaicContainer = document.getElementById('mosaic-container');
-    const iconGrid = document.getElementById('icon-grid');
-    const iconSlider = document.getElementById('icon-slider');
-    const toggleBtn = document.getElementById('toggle-gallery-btn');
 
-    if (
-      !sliderContainer ||
-      !mosaicContainer ||
-      !iconGrid ||
-      !iconSlider ||
-      !toggleBtn
-    ) {
-      return;
-    }
+    if (!mosaicContainer) return;
 
-    sliderContainer.style.display = isMosaic ? 'none' : 'block';
-    mosaicContainer.style.display = isMosaic ? 'block' : 'none';
+    const isMosaicVisible =
+      mosaicContainer.dataset.pswpActive === 'true';
 
-    iconGrid.style.display = isMosaic ? 'none' : 'block';
-    iconSlider.style.display = isMosaic ? 'block' : 'none';
+    setActiveView(!isMosaicVisible);
 
-    toggleBtn.setAttribute('aria-pressed', String(isMosaic));
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
 
-    sliderContainer
-      .querySelectorAll('[data-pswp-active]')
-      .forEach((item) => {
-        item.setAttribute('data-pswp-active', String(!isMosaic));
-      });
+  toggleBtn.addEventListener('click', toggleHandler);
 
-    mosaicContainer
-      .querySelectorAll('[data-pswp-active]')
-      .forEach((item) => {
-        item.setAttribute('data-pswp-active', String(isMosaic));
-      });
+  setActiveView(false);
+}
 
-    if (isMosaic) {
-      const gallery = document.getElementById('blog-mosaic-gallery');
+function cleanupBlogGallery() {
+  cleanupGallery?.();
+  cleanupGallery = null;
 
-      if (gallery && !cleanupGallery) {
-        cleanupGallery = initJustifiedGallery(gallery, {
-          itemSelector: '.gallery-item',
-          targetRowHeight: 288,
-          spacing: 8,
-          heightTolerance: 0.25,
-        });
-      }
-    }
+  const toggleBtn = document.getElementById('toggle-gallery-btn');
+
+  if (toggleBtn && toggleHandler) {
+    toggleBtn.removeEventListener('click', toggleHandler);
   }
 
-  function initBlogGallery() {
-    cleanupGallery?.();
-    cleanupGallery = null;
+  toggleHandler = null;
+}
 
-    const toggleBtn = document.getElementById('toggle-gallery-btn');
+document.addEventListener('astro:page-load', initBlogGallery);
+document.addEventListener('astro:before-swap', cleanupBlogGallery);
 
-    if (!toggleBtn) return;
+initBlogGallery();
 
-    if (toggleHandler) {
-      toggleBtn.removeEventListener('click', toggleHandler);
-    }
-
-    toggleHandler = () => {
-      const mosaicContainer = document.getElementById('mosaic-container');
-    
-      if (!mosaicContainer) return;
-    
-      const isMosaicVisible =
-        mosaicContainer.style.display !== 'none';
-    
-      setActiveView(!isMosaicVisible);
-    
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      });
-    };
-
-    toggleBtn.addEventListener('click', toggleHandler);
-
-    setActiveView(false);
-  }
-
-  function cleanupBlogGallery() {
-    cleanupGallery?.();
-    cleanupGallery = null;
-
-    const toggleBtn = document.getElementById('toggle-gallery-btn');
-
-    if (toggleBtn && toggleHandler) {
-      toggleBtn.removeEventListener('click', toggleHandler);
-    }
-
-    toggleHandler = null;
-  }
-
-  document.addEventListener('astro:page-load', initBlogGallery);
-  document.addEventListener('astro:before-swap', cleanupBlogGallery);
-
-  initBlogGallery();
 </script>

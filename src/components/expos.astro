@@ -1,187 +1,60 @@
 
 ---
-interface CV {
-  exposicions?: string[];
-  llibres?: string[];
-  premis?: string[];
-  'col·laboracions'?: string[];
-}
+import { useTranslations } from '../i18n/utils';
+
+type Category =
+  | 'exposicions'
+  | 'publicacions_i_col·laboracions'
+  | 'premis';
 
 interface Props {
-  cv?: CV;
+  category: Category;
+  items: string[];
   lang?: 'ca' | 'es' | 'en';
 }
 
-const { cv = {}, lang = 'ca' } = Astro.props;
+const {
+  category,
+  items,
+  lang = 'ca',
+} = Astro.props;
 
-const labels = {
-  ca: {
-    exposicions: 'EXPOSICIONS',
-    llibres: 'LLIBRES',
-    premis: 'PREMIS',
-    collaboracions: 'COL·LABORACIONS',
-  },
-  es: {
-    exposicions: 'EXPOSICIONES',
-    llibres: 'LIBROS',
-    premis: 'PREMIOS',
-    collaboracions: 'COLABORACIONES',
-  },
-  en: {
-    exposicions: 'EXHIBITIONS',
-    llibres: 'BOOKS',
-    premis: 'AWARDS',
-    collaboracions: 'COLLABORATIONS',
-  },
+const t = useTranslations(lang);
+
+const labels: Record<Category, string> = {
+  exposicions: t('cv.exhibitions'),
+  publicacions_i_col·laboracions: t('cv.publications'),
+  premis: t('cv.awards'),
 };
-
-const l = labels[lang];
-
-const sections = [
-  {
-    key: 'exposicions',
-    label: l.exposicions,
-    items: cv.exposicions || [],
-  },
-  {
-    key: 'llibres',
-    label: l.llibres,
-    items: cv.llibres || [],
-  },
-  {
-    key: 'premis',
-    label: l.premis,
-    items: cv.premis || [],
-  },
-  {
-    key: 'col·laboracions',
-    label: l.collaboracions,
-    items: cv['col·laboracions'] || [],
-  },
-];
-
-const visibleSections = sections.filter(
-  (section) => section.items.length > 0
-);
 ---
 
-{visibleSections.length > 0 && (
-  <div class="cv">
-    {visibleSections.map((section) => (
-      <details class="cv__section">
-        <summary class="cv__heading">{section.label}</summary>
+{items.length > 0 && (
+  <section class="cv-category">
+    <h2 class="cv-category__heading">{labels[category]}</h2>
 
-        <div class="cv__content">
-          <ul class="cv__list">
-            {section.items.map((item) => (
-              <li>{item}</li>
-            ))}
-          </ul>
-        </div>
-      </details>
-    ))}
-  </div>
+    <ul class="cv-category__list">
+      {items.map((item) => (
+        <li>{item}</li>
+      ))}
+    </ul>
+  </section>
 )}
 
-<script>
-  const sections = document.querySelectorAll<HTMLDetailsElement>('.cv__section');
-
-  sections.forEach((section) => {
-    const summary = section.querySelector('summary');
-
-    if (!summary) return;
-
-    let pinned = false;
-    let hoverTimer: ReturnType<typeof setTimeout> | undefined;
-    let closeTimer: ReturnType<typeof setTimeout> | undefined;
-
-    const isDesktop = window.matchMedia('(min-width: 769px) and (hover: hover) and (pointer: fine)');
-
-    section.addEventListener('pointerenter', () => {
-      if (!isDesktop.matches || pinned) return;
-
-      clearTimeout(closeTimer);
-
-      hoverTimer = setTimeout(() => {
-        section.open = true;
-      }, 250);
-    });
-
-    section.addEventListener('pointerleave', () => {
-      if (!isDesktop.matches || pinned) return;
-
-      clearTimeout(hoverTimer);
-
-      closeTimer = setTimeout(() => {
-        section.open = false;
-      }, 200);
-    });
-
-    summary.addEventListener('click', (event) => {
-      event.preventDefault();
-
-      clearTimeout(hoverTimer);
-      clearTimeout(closeTimer);
-
-      if (pinned) {
-        pinned = false;
-        section.open = false;
-      } else {
-        pinned = true;
-        section.open = true;
-      }
-    });
-
-    isDesktop.addEventListener('change', () => {
-      clearTimeout(hoverTimer);
-      clearTimeout(closeTimer);
-      pinned = false;
-      section.open = false;
-    });
-  });
-</script>
-
 <style>
-  .cv {
+  .cv-category {
     margin: 0;
   }
 
-  .cv__section {
-    margin: 0;
-  }
-
-  .cv__heading {
-    margin: 0;
-    padding: 1rem 0;
+  .cv-category__heading {
+    margin: 0 0 1rem;
     font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 0.05em;
     color: var(--text-1);
     text-transform: uppercase;
-    cursor: pointer;
   }
 
-  .cv__heading::marker {
-    color: var(--text-1);
-  }
-
-  .cv__content {
-    display: grid;
-    grid-template-rows: 0fr;
-    opacity: 0;
-    transition:
-      grid-template-rows 0.4s ease,
-      opacity 0.35s ease;
-  }
-
-  .cv__section[open] .cv__content {
-    grid-template-rows: 1fr;
-    opacity: 1;
-  }
-
-  .cv__list {
-    min-height: 0;
-    overflow: hidden;
+  .cv-category__list {
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
@@ -190,21 +63,11 @@ const visibleSections = sections.filter(
     padding: 0;
   }
 
-  .cv__section[open] .cv__list {
-    padding-bottom: 1rem;
-  }
-
-  .cv__list li {
+  .cv-category__list li {
     margin: 0;
     padding: 0;
     font-size: 0.85rem;
     line-height: 1.4;
     color: var(--text-2);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .cv__content {
-      transition: none;
-    }
   }
 </style>
