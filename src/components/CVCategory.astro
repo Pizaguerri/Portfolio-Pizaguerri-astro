@@ -1,0 +1,73 @@
+
+---
+import { useTranslations } from '../i18n/utils';
+
+type Category =
+  | 'exposicions'
+  | 'publicacions_i_col·laboracions'
+  | 'premis';
+
+interface Props {
+  category: Category;
+  items: string[];
+  lang?: 'ca' | 'es' | 'en';
+}
+
+const {
+  category,
+  items,
+  lang = 'ca',
+} = Astro.props;
+
+const t = useTranslations(lang);
+
+const labels: Record<Category, string> = {
+  exposicions: t('cv.exhibitions'),
+  publicacions_i_col·laboracions: t('cv.publications'),
+  premis: t('cv.awards'),
+};
+---
+
+{items.length > 0 && (
+  <section class="cv-category">
+    <h2 class="cv-category__heading">{labels[category]}</h2>
+
+    <ul class="cv-category__list">
+      {items.map((item) => (
+        <li>{item}</li>
+      ))}
+    </ul>
+  </section>
+)}
+
+<style>
+  .cv-category {
+    margin: 0;
+  }
+
+  .cv-category__heading {
+    margin: 0 0 1rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--text-1);
+    text-transform: uppercase;
+  }
+
+  .cv-category__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .cv-category__list li {
+    margin: 0;
+    padding: 0;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: var(--text-2);
+  }
+</style>

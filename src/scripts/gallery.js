@@ -51,6 +51,10 @@ export function initJustifiedGallery(gallery, options = {}) {
   let resizeObserver = null;
   let resizeFrame = null;
 
+  const images = items
+    .map((item) => item.querySelector("img"))
+    .filter(Boolean);
+
   const getAspectRatios = () =>
     items.map((item) => {
       const img = item.querySelector("img");
@@ -166,13 +170,11 @@ export function initJustifiedGallery(gallery, options = {}) {
   };
 
   // Recalcular cuando las imágenes terminan de cargar.
-  const images = items
-    .map((item) => item.querySelector("img"))
-    .filter(Boolean);
+  const handleImageLoad = () => scheduleUpdate(true);
 
   images.forEach((img) => {
-    img.addEventListener("load", () => scheduleUpdate(true));
-    img.addEventListener("error", () => scheduleUpdate(true));
+    img.addEventListener("load", handleImageLoad);
+    img.addEventListener("error", handleImageLoad);
   });
 
   // Observar cambios de tamaño del contenedor.
@@ -190,7 +192,12 @@ export function initJustifiedGallery(gallery, options = {}) {
   // Primera distribución.
   updateGallery(true);
 
-  // Función de limpieza para las navegaciones de Astro.
+  // Comprobar imágenes que ya terminaron de cargar.
+  if (images.some((img) => img.complete)) {
+    scheduleUpdate(true);
+  }
+
+  // Función de limpieza.
   return function cleanup() {
     if (destroyed) {
       return;
@@ -209,6 +216,12 @@ export function initJustifiedGallery(gallery, options = {}) {
       window.removeEventListener("resize", scheduleUpdate);
       window.removeEventListener("orientationchange", scheduleUpdate);
     }
+
+    // Eliminar listeners de imágenes.
+    images.forEach((img) => {
+      img.removeEventListener("load", handleImageLoad);
+      img.removeEventListener("error", handleImageLoad);
+    });
 
     // Restaurar estilos originales.
     if (originalGalleryStyle === null) {
