@@ -22,38 +22,6 @@ Em considero *fotògraf documental*, tot i que amb els anys, em fa gràcia pensa
 
 <a href="mailto:hola@pabloizaguerri.org?subject=Print%20request&body=Hola%20Pablo,%0D%0A%0D%0AM'agradaria%20rebre%20m%C3%A9s%20informaci%C3%B3%20sobre%20les%20c%C3%B2pies%20impreses:%0D%0Amides%20disponibles,%20preus%20i%20opcions%20d'enviament.%0D%0A%0D%0ALa%20fotografia%20que%20m'interessa%20%C3%A9s:%0D%0A%0D%0A-%20%0D%0A%0D%0AMoltes%20gr%C3%A0cies.%0D%0A%0D%0AAtentament," class="print-request-button">Vull informació sobre una còpia impresa</a>
 
----
-### Exposicions
 
-2026 - **CC Corralito**, Terrassa  
-2024 - _El Saló_, **CC Can Basté**, Barcelona  
-2023 - Curs de Fotoperiodisme i Fotografia Documental, **Escuela Libre Date Cuenta**, Barcelona  
-2022 - _Festival Cruïlla x Cities to be Photo Expo_, Barcelona  
-2018 - **Goletart**, Binissalem, Mallorca
-
-### Mencions
-
-2025 - _1r Premi Marta Pessarrodona de Videopoesia_, Ajuntament de Terrassa, amb Marta Rodriguez Palau  
-2020 - _Cities to be Photobook_  
-2019 - _Cities to be Photo Award_, finalista
-
-### Col·laboracions
-
-He treballat per a **Van Van, ACB,  Dynatrace, Ajuntament de Barcelona, Ajuntament de Sant Andreu de la Barca, L'Altaveu, ACCOR Hotels, Binaural, Salvaguarda del Montseny** i **Circle Beat**, entre d'altres.
-
-**Cercle** · 2020-2025  
-Creació d'imatge i cobertura gràfica, amb publicacions a _S'Altra Música_, _Enderrock_, _Ara Balears_ i xarxes socials.
-
-**Terraferida** · 2021-2022
-Cobertura gràfica per a xarxes socials.
-
-**Nuevas Frecuencias** · 2022-2023  
-Cobertura gràfica per a publicació musical.
-
-**Josep Sarrate** · 2021-2025  
-Fotografia fixa i BTS per a videoclips i curtmetratges, incloent-hi _Millor que sa mel_ i _A la Riba_.
-
-**Sonomada** · 2016-2020  
-Plataforma independent de recomanacions musicals.
 
 <img src="/images/about4.jpg" class="" alt="Kein Mensch Ist Illegal">

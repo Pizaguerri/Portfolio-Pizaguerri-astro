@@ -2,8 +2,18 @@
 title: Eclipsi en flames sobre Cavalleria
 description: "Sa imatge que cercava sense saber-ho"
 date: 2025-08-12
+tags:
+  - Fotografia
+  - Paisatge
+  - Eclipsi
+cv:
+  exposicions: []
+  llibres: []
+  premis: []
+  col·laboracions: []
 summary: Fotografia de l'eclipsi total del 12 d'Agost, sobre el cel del Cap de Cavalleria, Menorca.
 draft: false
+summary_en: Fotografia de l'eclipsi total del 12 d'Agost, sobre el cel del Cap de Cavalleria, Menorca.
 ---
 
 ### Eclipsi en flames sobre Cavalleria

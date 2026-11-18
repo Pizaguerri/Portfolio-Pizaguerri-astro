@@ -69,34 +69,77 @@ const visibleSections = sections.filter(
   <div class="cv">
     {visibleSections.map((section) => (
       <details class="cv__section">
-        <summary class="cv__heading">
-          <span>{section.label}</span>
-          <svg
-            class="cv__icon"
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
-        </summary>
+        <summary class="cv__heading">{section.label}</summary>
 
-        <ul class="cv__list">
-          {section.items.map((item) => (
-            <li>{item}</li>
-          ))}
-        </ul>
+        <div class="cv__content">
+          <ul class="cv__list">
+            {section.items.map((item) => (
+              <li>{item}</li>
+            ))}
+          </ul>
+        </div>
       </details>
     ))}
   </div>
 )}
+
+<script>
+  const sections = document.querySelectorAll<HTMLDetailsElement>('.cv__section');
+
+  sections.forEach((section) => {
+    const summary = section.querySelector('summary');
+
+    if (!summary) return;
+
+    let pinned = false;
+    let hoverTimer: ReturnType<typeof setTimeout> | undefined;
+    let closeTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const isDesktop = window.matchMedia('(min-width: 769px) and (hover: hover) and (pointer: fine)');
+
+    section.addEventListener('pointerenter', () => {
+      if (!isDesktop.matches || pinned) return;
+
+      clearTimeout(closeTimer);
+
+      hoverTimer = setTimeout(() => {
+        section.open = true;
+      }, 250);
+    });
+
+    section.addEventListener('pointerleave', () => {
+      if (!isDesktop.matches || pinned) return;
+
+      clearTimeout(hoverTimer);
+
+      closeTimer = setTimeout(() => {
+        section.open = false;
+      }, 200);
+    });
+
+    summary.addEventListener('click', (event) => {
+      event.preventDefault();
+
+      clearTimeout(hoverTimer);
+      clearTimeout(closeTimer);
+
+      if (pinned) {
+        pinned = false;
+        section.open = false;
+      } else {
+        pinned = true;
+        section.open = true;
+      }
+    });
+
+    isDesktop.addEventListener('change', () => {
+      clearTimeout(hoverTimer);
+      clearTimeout(closeTimer);
+      pinned = false;
+      section.open = false;
+    });
+  });
+</script>
 
 <style>
   .cv {
@@ -108,49 +151,47 @@ const visibleSections = sections.filter(
   }
 
   .cv__heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
+    margin: 0;
     padding: 1rem 0;
-    cursor: pointer;
-    list-style: none;
     font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 0.05em;
     color: var(--text-1);
     text-transform: uppercase;
-    user-select: none;
-  }
-
-  .cv__heading::-webkit-details-marker {
-    display: none;
+    cursor: pointer;
   }
 
   .cv__heading::marker {
-    content: '';
+    color: var(--text-1);
   }
 
-  .cv__heading:hover {
-    color: #6F362B;
+  .cv__content {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition:
+      grid-template-rows 0.4s ease,
+      opacity 0.35s ease;
   }
 
-  .cv__icon {
-    flex-shrink: 0;
-    transition: transform 0.25s ease;
-  }
-
-  .cv__section[open] .cv__icon {
-    transform: rotate(180deg);
+  .cv__section[open] .cv__content {
+    grid-template-rows: 1fr;
+    opacity: 1;
   }
 
   .cv__list {
+    min-height: 0;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
     list-style: none;
     margin: 0;
-    padding: 0 0 1rem;
+    padding: 0;
+  }
+
+  .cv__section[open] .cv__list {
+    padding-bottom: 1rem;
   }
 
   .cv__list li {
@@ -159,5 +200,11 @@ const visibleSections = sections.filter(
     font-size: 0.85rem;
     line-height: 1.4;
     color: var(--text-2);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cv__content {
+      transition: none;
+    }
   }
 </style>

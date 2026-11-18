@@ -3,10 +3,17 @@ title: The Anxiety of Running Away From a Violent Storm
 description: "Fugint d'una tempesta per s'Autobahn"
 date: 2023-07-11
 tags:
-  - fotografia
-  - paisatge
+  - Fotografia
+  - Paisatge
+  - Canvi Climàtic
+cv:
+  exposicions: []
+  llibres: []
+  premis: []
+  col·laboracions: []
 summary: Una tempesta molt virulenta ens encalça per s'autobahn.
 draft: false
+summary_en: Una tempesta molt virulenta ens encalça per s'autobahn.
 ---
 
 **Les tempestes durant l'estiu són normals. Però mai no hagués pensat que viuriem una així.**
