@@ -16,7 +16,7 @@ const portfolioSchema = z.object({
   description: z.string().optional(),
   date: z.coerce.date().optional(),
   tags: z.array(z.string()).optional().default([]),
-  summary: z.string().optional(),
+  summary_en: z.string().optional(),
   draft: z.boolean().optional().default(false),
 });
 

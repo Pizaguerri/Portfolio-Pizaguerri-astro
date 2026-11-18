@@ -1,3 +1,4 @@
+
 export const ui = {
   ca: {
     'nav.index': 'INDEX',
@@ -22,6 +23,7 @@ export const ui = {
     'nav.home': 'Índex',
     'gallery': 'Galeria',
     'expos': 'Mostres',
+    'englishSummary': 'Eng',
     'featuredImageAlt': 'portada',
     'latestPost': 'Darrer post',
     'alsoAvailableIn': 'També disponible en',
@@ -58,6 +60,7 @@ Atentament,`,
     'nav.home': 'Índice',
     'gallery': 'Galería',
     'expos': 'Exposiciones',
+    'englishSummary': 'Eng',
     'featuredImageAlt': 'portada',
     'latestPost': 'Última publicación',
     'alsoAvailableIn': 'También disponible en',
@@ -94,6 +97,7 @@ Un saludo,`,
     'nav.home': 'Index',
     'gallery': 'Gallery',
     'expos': 'Exhibitions',
+    'englishSummary': 'Eng',
     'featuredImageAlt': 'cover',
     'latestPost': 'Latest post',
     'alsoAvailableIn': 'Also available in',

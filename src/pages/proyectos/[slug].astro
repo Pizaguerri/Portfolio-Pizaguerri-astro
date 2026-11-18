@@ -4,7 +4,11 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { Image, getImage } from 'astro:assets';
 import Expos from '../../components/expos.astro';
+import Disclosure from '../../components/Disclosure.astro';
+import Tags from '../../components/Tags.astro';
+import { useTranslations } from '../../i18n/utils';
 
+const t = useTranslations('ca');
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
@@ -26,8 +30,9 @@ const allImages = import.meta.glob(
   { eager: true }
 );
 
-const projectImagePaths = Object.keys(allImages)
-  .filter((path) => path.includes(`/projects/${slug}/`));
+const projectImagePaths = Object.keys(allImages).filter((path) =>
+  path.includes(`/projects/${slug}/`)
+);
 
 const galleryPaths = projectImagePaths
   .filter((path) => !path.toLowerCase().includes('cover.jpg'))
@@ -66,16 +71,15 @@ const galleryImages = await Promise.all(
 const sliderImages = coverImage
   ? [coverImage, ...galleryImages]
   : galleryImages;
+
+const englishSummary = project.data.summary_en?.trim();
 ---
 
 <BaseLayout
   title={`${project.data.title} | Pablo Izaguerri`}
   description={project.data.description}
 >
-  <!-- Galerías -->
   <div id="project-gallery-container">
-
-    <!-- VISTA SLIDER -->
     <div class="slider-container" id="slider-container">
       <div class="slider-track" id="slider-track">
         {sliderImages.map((img, index) => (
@@ -98,7 +102,6 @@ const sliderImages = coverImage
       </div>
     </div>
 
-    <!-- VISTA MOSAICO JUSTIFICADO -->
     <div
       class="mosaic-container"
       id="mosaic-container"
@@ -133,13 +136,10 @@ const sliderImages = coverImage
         </div>
       </div>
     </div>
-
   </div>
 
-  <!-- LAYOUT EDITORIAL -->
   <div class="content-container">
     <article class="project-layout">
-
       <aside class="project-sidebar">
         <div class="sidebar-header">
           <h1>{project.data.title}</h1>
@@ -201,17 +201,18 @@ const sliderImages = coverImage
           </span>
         )}
 
-        <ul class="project-tags">
-          {project.data.tags?.map((tag) => (
-            <li class="tag">{tag}</li>
-          ))}
-        </ul>
+        <Tags tags={project.data.tags} />
 
         <Expos
           cv={project.data.cv}
           lang="ca"
         />
-        
+
+        {englishSummary && (
+          <Disclosure title={t('englishSummary')}>
+            <p>{englishSummary}</p>
+          </Disclosure>
+        )}
       </aside>
 
       <div class="project-main">
@@ -234,13 +235,11 @@ const sliderImages = coverImage
           />
         </div>
       </div>
-
     </article>
   </div>
 </BaseLayout>
 
 <style>
-  /* 1. SLIDER */
   #project-gallery-container {
     width: 100%;
     margin-bottom: 3rem;
@@ -282,7 +281,6 @@ const sliderImages = coverImage
     object-fit: contain;
   }
 
-  /* 2. MOSAICO */
   .justified-gallery {
     position: relative;
     width: 100%;
@@ -300,7 +298,6 @@ const sliderImages = coverImage
     object-fit: contain;
   }
 
-  /* 3. BOTÓN Y HEADER SIDEBAR */
   .sidebar-header {
     display: flex;
     justify-content: space-between;
@@ -335,12 +332,11 @@ const sliderImages = coverImage
     background: var(--surface-2);
   }
 
-  /* 4. LAYOUT EDITORIAL */
   .project-layout {
     display: grid;
     grid-template-columns: 1fr 2fr;
     gap: 4rem;
-    padding: 2rem 0 6rem 0;
+    padding: 2rem 0 6rem;
   }
 
   .project-sidebar {
@@ -356,14 +352,6 @@ const sliderImages = coverImage
     margin-bottom: 2rem;
   }
 
-  .project-tags {
-    display: flex;
-    flex-wrap: wrap;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
   .project-summary {
     font-size: 1.5rem;
     line-height: 1.5;
@@ -373,7 +361,6 @@ const sliderImages = coverImage
     font-weight: 500;
   }
 
-  /* 5. RESPONSIVE */
   @media (max-width: 900px) {
     .project-layout {
       grid-template-columns: 1fr;
@@ -405,18 +392,6 @@ const sliderImages = coverImage
     .project-sidebar h1 {
       font-size: 2rem;
     }
-  }
-
-  .tag {
-    margin: 0;
-    padding: 0;
-    font-size: 0.9rem;
-    color: var(--text-1);
-  }
-
-  .tag:not(:last-child)::after {
-    content: ",";
-    margin-right: 0.3em;
   }
 </style>
 
@@ -491,12 +466,17 @@ const sliderImages = coverImage
 
     toggleHandler = () => {
       const mosaicContainer = document.getElementById('mosaic-container');
-
+    
       if (!mosaicContainer) return;
-
+    
       const isMosaicVisible = mosaicContainer.style.display !== 'none';
-
+    
       setActiveView(!isMosaicVisible);
+    
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
     };
 
     toggleBtn.addEventListener('click', toggleHandler);

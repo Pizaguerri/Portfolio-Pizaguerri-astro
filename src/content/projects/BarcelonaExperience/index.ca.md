@@ -12,6 +12,8 @@ cv:
   premis: []
   col·laboracions: []
 draft: false
+summary_en: >-
+  English summary of the project, written manually.
 ---
 
 
