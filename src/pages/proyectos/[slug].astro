@@ -49,7 +49,6 @@ const projectImagePaths = Object.keys(allImages).filter((path) =>
   path.toLowerCase().includes(`/projects/${slug}/`)
 );
 
-const coverPath = projectImagePaths.find(isCover);
 
 const galleryPaths = projectImagePaths
   .filter((path) => !isCover(path))
@@ -66,17 +65,11 @@ const optimizeImage = async (path) => {
   };
 };
 
-const coverImage = coverPath
-  ? await optimizeImage(coverPath)
-  : null;
-
 const galleryImages = await Promise.all(
   galleryPaths.map(optimizeImage)
 );
 
-const sliderImages = coverImage
-  ? [coverImage, ...galleryImages]
-  : galleryImages;
+const sliderImages = galleryImages;
 
 const englishSummary = project.data.summary_en?.trim();
 ---

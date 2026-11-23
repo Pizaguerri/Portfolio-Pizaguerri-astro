@@ -8,7 +8,26 @@ import "./lightbox.js";
 let lastScrollY = window.scrollY;
 
 // =========================================
-// 2. MENÚ MÓVIL
+// 2. ESTADO DEL MENÚ
+// =========================================
+
+const setMenuState = (isOpen) => {
+  const header = document.getElementById("main-header");
+  const button = document.getElementById("menu-toggle");
+
+  if (!header || !button) return;
+
+  header.classList.toggle("menu-open", isOpen);
+
+  button.setAttribute("aria-expanded", String(isOpen));
+  button.setAttribute(
+    "aria-label",
+    isOpen ? "Cerrar menú" : "Abrir menú"
+  );
+};
+
+// =========================================
+// 3. MENÚ MÓVIL
 // =========================================
 
 document.addEventListener("click", (event) => {
@@ -16,52 +35,50 @@ document.addEventListener("click", (event) => {
 
   if (!(target instanceof Element)) return;
 
+  // Abrir o cerrar mediante el botón.
   const button = target.closest("#menu-toggle");
 
-  if (!button) return;
+  if (button) {
+    event.preventDefault();
 
-  event.preventDefault();
+    const isOpen = button.getAttribute("aria-expanded") === "true";
+    setMenuState(!isOpen);
 
-  const menu = document.getElementById("menu");
+    return;
+  }
 
-  if (!menu) return;
+  // Cerrar al seleccionar un enlace del menú.
+  const menuLink = target.closest("#menu a");
 
-  const isOpen = button.getAttribute("aria-expanded") === "true";
-  const nextState = !isOpen;
-
-  button.setAttribute("aria-expanded", String(nextState));
-  button.setAttribute(
-    "aria-label",
-    nextState ? "Cerrar menú" : "Abrir menú"
-  );
-
-  menu.classList.toggle("hidden", !nextState);
+  if (menuLink) {
+    setMenuState(false);
+  }
 });
 
+
 // =========================================
-// 3. SCROLL: MENÚ Y HEADER
+// 4. SCROLL: MENÚ Y HEADER
 // =========================================
 
 window.addEventListener(
   "scroll",
   () => {
-    const menu = document.getElementById("menu");
-    const button = document.getElementById("menu-toggle");
-
-    if (menu && button && !menu.classList.contains("hidden")) {
-      menu.classList.add("hidden");
-      button.setAttribute("aria-expanded", "false");
-      button.setAttribute("aria-label", "Abrir menú");
-    }
-
     const header = document.getElementById("main-header");
 
-    if (header) {
-      if (window.scrollY > lastScrollY && window.scrollY > 100) {
-        header.classList.add("header-hidden");
-      } else {
-        header.classList.remove("header-hidden");
-      }
+    if (!header) return;
+
+    const scrollingDown = window.scrollY > lastScrollY;
+
+    // Cerrar el menú al desplazarse hacia abajo.
+    if (scrollingDown && header.classList.contains("menu-open")) {
+      setMenuState(false);
+    }
+
+    // Ocultar al bajar y mostrar al subir.
+    if (scrollingDown && window.scrollY > 100) {
+      header.classList.add("header-hidden");
+    } else {
+      header.classList.remove("header-hidden");
     }
 
     lastScrollY = window.scrollY;
@@ -69,19 +86,13 @@ window.addEventListener(
   { passive: true }
 );
 
+
 // =========================================
-// 4. REINICIAR ESTADO EN CADA NAVEGACIÓN
+// 5. REINICIAR ESTADO EN CADA NAVEGACIÓN
 // =========================================
 
 document.addEventListener("astro:page-load", () => {
-  const menu = document.getElementById("menu");
-  const button = document.getElementById("menu-toggle");
-
-  if (menu && button) {
-    menu.classList.add("hidden");
-    button.setAttribute("aria-expanded", "false");
-    button.setAttribute("aria-label", "Abrir menú");
-  }
+  setMenuState(false);
 
   lastScrollY = window.scrollY;
 
@@ -90,16 +101,14 @@ document.addEventListener("astro:page-load", () => {
 });
 
 // =========================================
-// 5. PROTECCIÓN DE IMÁGENES
+// 6. PROTECCIÓN DE IMÁGENES
 // =========================================
 
 const isImageTarget = (target) => {
   if (!(target instanceof Element)) return false;
 
-  // El evento puede comenzar directamente sobre la imagen.
   if (target.closest("img")) return true;
 
-  // También puede comenzar sobre el enlace que contiene la imagen.
   const link = target.closest("a");
 
   return Boolean(link?.querySelector("img"));

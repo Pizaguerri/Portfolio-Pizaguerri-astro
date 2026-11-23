@@ -48,7 +48,6 @@ const postImagePaths = Object.keys(allImages).filter((path) =>
   path.toLowerCase().includes(`/blog/${slug}/`)
 );
 
-const coverPath = postImagePaths.find(isCover);
 
 const galleryPaths = postImagePaths
   .filter((path) => !isCover(path))
@@ -65,17 +64,11 @@ const optimizeImage = async (path) => {
   };
 };
 
-const coverImage = coverPath
-  ? await optimizeImage(coverPath)
-  : null;
-
 const galleryImages = await Promise.all(
   galleryPaths.map(optimizeImage)
 );
 
-const sliderImages = coverImage
-  ? [coverImage, ...galleryImages]
-  : galleryImages;
+const sliderImages = galleryImages;
 ---
 
 <BaseLayout
