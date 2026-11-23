@@ -2,7 +2,6 @@
 title: "Sobre jo"
 type: "page"
 layout: "single"
-date: 2026-06-04
 ---
 
 **Si vols encarregar alguna còpia d'impremta, no dubtis a fer una petició al següent enllaç, o per xarxes, tot indicant quina imatge t'agradaria comanar :)**

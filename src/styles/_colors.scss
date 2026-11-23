@@ -1,30 +1,33 @@
+
 :root {
   color-scheme: light dark;
 
-  // Paleta base
-  --surface-1-light: #ffffff;
-  --surface-2-light: #e5e5e5;
-  --text-1-light: #0a0a0a;
-  --text-2-light: #737373;
-  --border-light: #bbb;
-  --link-light: #0066ff;
-  --bold-light: #3a5068;
+  // Modo claro
+  --surface-1-light: #efedea;
+  --surface-2-light: #F0F0F0;
+  --text-1-light: #191919;
+  --text-2-light: #686663;
+  --border-light: #D8D8D8;
+  --link-light: #191919;
+  --bold-light: #191919;
 
-  --surface-1-dark: #111111;
-  --surface-2-dark: #404040;
-  --text-1-dark: #fafafa;
-  --text-2-dark: #a3a3a3;
-  --border-dark: #606060;
-  --link-dark: #3399ff;
-  --bold-dark: #9ab8d6;
+  // Modo oscuro
+  --surface-1-dark: #191919;
+  --surface-2-dark: #292929;
+  --text-1-dark: #efedea;
+  --text-2-dark: #aaa7a2;
+  --border-dark: #45423f;
+  --link-dark: #efedea;
+  --bold-dark: #efedea;
 
-  // Aliases activos
+  // Aliases activos: modo claro por defecto
   --surface-1: var(--surface-1-light);
   --surface-2: var(--surface-2-light);
   --text-1: var(--text-1-light);
   --text-2: var(--text-2-light);
   --border: var(--border-light);
   --link: var(--link-light);
+  --bold: var(--bold-light);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -35,6 +38,7 @@
     --text-2: var(--text-2-dark);
     --border: var(--border-dark);
     --link: var(--link-dark);
+    --bold: var(--bold-dark);
   }
 }
 
@@ -46,6 +50,7 @@ html.light {
   --text-2: var(--text-2-light);
   --border: var(--border-light);
   --link: var(--link-light);
+  --bold: var(--bold-light);
 }
 
 html.dark {
@@ -56,4 +61,5 @@ html.dark {
   --text-2: var(--text-2-dark);
   --border: var(--border-dark);
   --link: var(--link-dark);
+  --bold: var(--bold-dark);
 }
