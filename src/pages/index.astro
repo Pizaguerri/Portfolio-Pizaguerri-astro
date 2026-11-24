@@ -27,11 +27,10 @@ const selectedItems = selectedImages.length
 
 // 2. Proyectos (orden: más reciente → más antigua)
 const projects = (await getCollection('projects'))
-  .filter((p) => p.id.endsWith('.ca'))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 const projectImages = projects.map((p) => {
-  const slug = p.id.replace(/\.ca$/, '').trim();
+  const slug = p.id.trim();
 
   const images = mediaManifest
     .filter((image) =>
@@ -58,11 +57,10 @@ const projectImages = projects.map((p) => {
 
 // 3. Blog (orden: más reciente → más antigua)
 const posts = (await getCollection('blog'))
-  .filter((p) => p.id.endsWith('.ca'))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 const postImages = posts.map((p) => {
-  const slug = p.id.replace(/\.ca$/, '').trim();
+  const slug = p.id.trim();
 
   const images = mediaManifest
     .filter((image) =>

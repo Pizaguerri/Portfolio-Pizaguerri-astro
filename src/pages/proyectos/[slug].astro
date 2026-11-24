@@ -14,21 +14,16 @@ const t = useTranslations('ca');
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
 
-  return projects
-    .filter((project) => project.id.endsWith('.ca'))
-    .map((project) => ({
-      params: { slug: project.id.replace(/\.ca$/, '') },
-      props: { project },
-    }));
+  return projects.map((project) => ({
+    params: { slug: project.id.trim() },
+    props: { project },
+  }));
 }
 
 const { project } = Astro.props;
 const { Content } = await render(project);
 
-const slug = project.id
-  .replace(/\.ca$/, '')
-  .trim()
-  .toLowerCase();
+const slug = project.id.trim().toLowerCase();
 
 const englishSummary = project.data.summary_en?.trim();
 
@@ -415,108 +410,108 @@ function getMarkdownImage(props) {
 </style>
 
 <script>
-import { initJustifiedGallery } from '../../scripts/gallery.js';
+  import { initJustifiedGallery } from '../../scripts/gallery.js';
 
-let cleanupGallery = null;
-let toggleHandler = null;
+  let cleanupGallery = null;
+  let toggleHandler = null;
 
-function setActiveView(isMosaic) {
-  const sliderContainer = document.getElementById('slider-container');
-  const mosaicContainer = document.getElementById('mosaic-container');
-  const iconGrid = document.getElementById('icon-grid');
-  const iconSlider = document.getElementById('icon-slider');
-  const toggleBtn = document.getElementById('toggle-gallery-btn');
+  function setActiveView(isMosaic) {
+    const sliderContainer = document.getElementById('slider-container');
+    const mosaicContainer = document.getElementById('mosaic-container');
+    const iconGrid = document.getElementById('icon-grid');
+    const iconSlider = document.getElementById('icon-slider');
+    const toggleBtn = document.getElementById('toggle-gallery-btn');
 
-  if (
-    !sliderContainer ||
-    !mosaicContainer ||
-    !iconGrid ||
-    !iconSlider ||
-    !toggleBtn
-  ) {
-    return;
-  }
+    if (
+      !sliderContainer ||
+      !mosaicContainer ||
+      !iconGrid ||
+      !iconSlider ||
+      !toggleBtn
+    ) {
+      return;
+    }
 
-  sliderContainer.style.display = isMosaic ? 'none' : 'block';
-  mosaicContainer.style.display = isMosaic ? 'block' : 'none';
+    sliderContainer.style.display = isMosaic ? 'none' : 'block';
+    mosaicContainer.style.display = isMosaic ? 'block' : 'none';
 
-  sliderContainer.dataset.pswpActive = String(!isMosaic);
-  mosaicContainer.dataset.pswpActive = String(isMosaic);
+    sliderContainer.dataset.pswpActive = String(!isMosaic);
+    mosaicContainer.dataset.pswpActive = String(isMosaic);
 
-  iconGrid.style.display = isMosaic ? 'none' : 'block';
-  iconSlider.style.display = isMosaic ? 'block' : 'none';
+    iconGrid.style.display = isMosaic ? 'none' : 'block';
+    iconSlider.style.display = isMosaic ? 'block' : 'none';
 
-  toggleBtn.setAttribute('aria-pressed', String(isMosaic));
+    toggleBtn.setAttribute('aria-pressed', String(isMosaic));
 
-  cleanupGallery?.();
-  cleanupGallery = null;
+    cleanupGallery?.();
+    cleanupGallery = null;
 
-  if (isMosaic) {
-    const gallery = document.getElementById('project-mosaic-gallery');
+    if (isMosaic) {
+      const gallery = document.getElementById('project-mosaic-gallery');
 
-    if (gallery) {
-      cleanupGallery = initJustifiedGallery(gallery, {
-        itemSelector: '.gallery-item',
-        targetRowHeight: 288,
-        spacing: 8,
-        heightTolerance: 0.25,
-      });
+      if (gallery) {
+        cleanupGallery = initJustifiedGallery(gallery, {
+          itemSelector: '.gallery-item',
+          targetRowHeight: 288,
+          spacing: 8,
+          heightTolerance: 0.25,
+        });
+      }
     }
   }
-}
 
-function initProjectGallery() {
-  const gallery = document.getElementById('project-mosaic-gallery');
+  function initProjectGallery() {
+    const gallery = document.getElementById('project-mosaic-gallery');
 
-  if (!gallery) return;
+    if (!gallery) return;
 
-  cleanupGallery?.();
-  cleanupGallery = null;
+    cleanupGallery?.();
+    cleanupGallery = null;
 
-  const toggleBtn = document.getElementById('toggle-gallery-btn');
+    const toggleBtn = document.getElementById('toggle-gallery-btn');
 
-  if (!toggleBtn) return;
+    if (!toggleBtn) return;
 
-  if (toggleHandler) {
-    toggleBtn.removeEventListener('click', toggleHandler);
+    if (toggleHandler) {
+      toggleBtn.removeEventListener('click', toggleHandler);
+    }
+
+    toggleHandler = () => {
+      const mosaicContainer = document.getElementById('mosaic-container');
+
+      if (!mosaicContainer) return;
+
+      const isMosaicVisible =
+        mosaicContainer.dataset.pswpActive === 'true';
+
+      setActiveView(!isMosaicVisible);
+
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    };
+
+    toggleBtn.addEventListener('click', toggleHandler);
+
+    setActiveView(false);
   }
 
-  toggleHandler = () => {
-    const mosaicContainer = document.getElementById('mosaic-container');
+  function cleanupProjectGallery() {
+    cleanupGallery?.();
+    cleanupGallery = null;
 
-    if (!mosaicContainer) return;
+    const toggleBtn = document.getElementById('toggle-gallery-btn');
 
-    const isMosaicVisible =
-      mosaicContainer.dataset.pswpActive === 'true';
+    if (toggleBtn && toggleHandler) {
+      toggleBtn.removeEventListener('click', toggleHandler);
+    }
 
-    setActiveView(!isMosaicVisible);
-
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-  };
-
-  toggleBtn.addEventListener('click', toggleHandler);
-
-  setActiveView(false);
-}
-
-function cleanupProjectGallery() {
-  cleanupGallery?.();
-  cleanupGallery = null;
-
-  const toggleBtn = document.getElementById('toggle-gallery-btn');
-
-  if (toggleBtn && toggleHandler) {
-    toggleBtn.removeEventListener('click', toggleHandler);
+    toggleHandler = null;
   }
 
-  toggleHandler = null;
-}
+  document.addEventListener('astro:page-load', initProjectGallery);
+  document.addEventListener('astro:before-swap', cleanupProjectGallery);
 
-document.addEventListener('astro:page-load', initProjectGallery);
-document.addEventListener('astro:before-swap', cleanupProjectGallery);
-
-initProjectGallery();
+  initProjectGallery();
 </script>

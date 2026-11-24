@@ -1,3 +1,4 @@
+
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -10,21 +11,16 @@ import { mediaUrl } from '../../utils/media.js';
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
 
-  return posts
-    .filter((post) => post.id.endsWith('.ca'))
-    .map((post) => ({
-      params: { slug: post.id.replace(/\.ca$/, '').trim() },
-      props: { post },
-    }));
+  return posts.map((post) => ({
+    params: { slug: post.id.trim() },
+    props: { post },
+  }));
 }
 
 const { post } = Astro.props;
 const { Content } = await render(post);
 
-const slug = post.id
-  .replace(/\.ca$/, '')
-  .trim()
-  .toLowerCase();
+const slug = post.id.trim().toLowerCase();
 
 const englishSummary = post.data.summary_en?.trim();
 
@@ -92,22 +88,21 @@ function getMarkdownImage(props) {
       data-pswp-active="true"
     >
       <div class="slider-track" id="slider-track">
-
-      {sliderImages.map((img, index) => (
-        <a
-          href={img.url}
-          class="slider-item"
-          data-pswp-width={img.width}
-          data-pswp-height={img.height}
-        >
-          <img
-            src={img.url}
-            alt=""
-            width={img.width}
-            height={img.height}
-            loading={index === 0 ? 'eager' : 'lazy'}
-          />
-        </a>
+        {sliderImages.map((img, index) => (
+          <a
+            href={img.url}
+            class="slider-item"
+            data-pswp-width={img.width}
+            data-pswp-height={img.height}
+          >
+            <img
+              src={img.url}
+              alt=""
+              width={img.width}
+              height={img.height}
+              loading={index === 0 ? 'eager' : 'lazy'}
+            />
+          </a>
         ))}
       </div>
     </div>
@@ -123,24 +118,22 @@ function getMarkdownImage(props) {
           id="blog-mosaic-gallery"
           class="justified-grid justified-gallery"
         >
-
-        {galleryImages.map((img) => (
+          {galleryImages.map((img) => (
             <a
-            href={img.url}
-            class="post-gallery-item gallery-item blog-mosaic-item"
-            data-pswp-width={img.width}
-            data-pswp-height={img.height}
+              href={img.url}
+              class="post-gallery-item gallery-item blog-mosaic-item"
+              data-pswp-width={img.width}
+              data-pswp-height={img.height}
             >
-            <img
+              <img
                 src={img.url}
                 alt=""
                 width={img.width}
                 height={img.height}
                 loading="lazy"
-            />
+              />
             </a>
-        ))}
-
+          ))}
         </div>
       </div>
     </div>
@@ -229,12 +222,12 @@ function getMarkdownImage(props) {
         </p>
 
         <div class="prose">
-        <Content
+          <Content
             components={{
-            img: (props) => {
+              img: (props) => {
                 const image = getMarkdownImage(props);
                 return (
-                <img
+                  <img
                     src={image.src}
                     alt={props.alt ?? ''}
                     title={props.title}
@@ -242,11 +235,11 @@ function getMarkdownImage(props) {
                     height={image.height}
                     loading="lazy"
                     style="width: 100%; height: auto; border-radius: 0; margin: 2rem 0;"
-                />
+                  />
                 );
-            },
+              },
             }}
-        />
+          />
         </div>
       </div>
     </article>
@@ -415,111 +408,108 @@ function getMarkdownImage(props) {
 </style>
 
 <script>
+  import { initJustifiedGallery } from '../../scripts/gallery.js';
 
-import { initJustifiedGallery } from '../../scripts/gallery.js';
+  let cleanupGallery = null;
+  let toggleHandler = null;
 
-let cleanupGallery = null;
-let toggleHandler = null;
+  function setActiveView(isMosaic) {
+    const sliderContainer = document.getElementById('slider-container');
+    const mosaicContainer = document.getElementById('mosaic-container');
+    const iconGrid = document.getElementById('icon-grid');
+    const iconSlider = document.getElementById('icon-slider');
+    const toggleBtn = document.getElementById('toggle-gallery-btn');
 
-function setActiveView(isMosaic) {
-  const sliderContainer = document.getElementById('slider-container');
-  const mosaicContainer = document.getElementById('mosaic-container');
-  const iconGrid = document.getElementById('icon-grid');
-  const iconSlider = document.getElementById('icon-slider');
-  const toggleBtn = document.getElementById('toggle-gallery-btn');
+    if (
+      !sliderContainer ||
+      !mosaicContainer ||
+      !iconGrid ||
+      !iconSlider ||
+      !toggleBtn
+    ) {
+      return;
+    }
 
-  if (
-    !sliderContainer ||
-    !mosaicContainer ||
-    !iconGrid ||
-    !iconSlider ||
-    !toggleBtn
-  ) {
-    return;
-  }
+    sliderContainer.style.display = isMosaic ? 'none' : 'block';
+    mosaicContainer.style.display = isMosaic ? 'block' : 'none';
 
-  sliderContainer.style.display = isMosaic ? 'none' : 'block';
-  mosaicContainer.style.display = isMosaic ? 'block' : 'none';
+    sliderContainer.dataset.pswpActive = String(!isMosaic);
+    mosaicContainer.dataset.pswpActive = String(isMosaic);
 
-  sliderContainer.dataset.pswpActive = String(!isMosaic);
-  mosaicContainer.dataset.pswpActive = String(isMosaic);
+    iconGrid.style.display = isMosaic ? 'none' : 'block';
+    iconSlider.style.display = isMosaic ? 'block' : 'none';
 
-  iconGrid.style.display = isMosaic ? 'none' : 'block';
-  iconSlider.style.display = isMosaic ? 'block' : 'none';
+    toggleBtn.setAttribute('aria-pressed', String(isMosaic));
 
-  toggleBtn.setAttribute('aria-pressed', String(isMosaic));
+    cleanupGallery?.();
+    cleanupGallery = null;
 
-  cleanupGallery?.();
-  cleanupGallery = null;
+    if (isMosaic) {
+      const gallery = document.getElementById('blog-mosaic-gallery');
 
-  if (isMosaic) {
-    const gallery = document.getElementById('blog-mosaic-gallery');
-
-    if (gallery) {
-      cleanupGallery = initJustifiedGallery(gallery, {
-        itemSelector: '.gallery-item',
-        targetRowHeight: 288,
-        spacing: 8,
-        heightTolerance: 0.25,
-      });
+      if (gallery) {
+        cleanupGallery = initJustifiedGallery(gallery, {
+          itemSelector: '.gallery-item',
+          targetRowHeight: 288,
+          spacing: 8,
+          heightTolerance: 0.25,
+        });
+      }
     }
   }
-}
 
-function initBlogGallery() {
-  // Evita que este script se ejecute en las páginas de proyectos.
-  const gallery = document.getElementById('blog-mosaic-gallery');
+  function initBlogGallery() {
+    const gallery = document.getElementById('blog-mosaic-gallery');
 
-  if (!gallery) return;
+    if (!gallery) return;
 
-  cleanupGallery?.();
-  cleanupGallery = null;
+    cleanupGallery?.();
+    cleanupGallery = null;
 
-  const toggleBtn = document.getElementById('toggle-gallery-btn');
+    const toggleBtn = document.getElementById('toggle-gallery-btn');
 
-  if (!toggleBtn) return;
+    if (!toggleBtn) return;
 
-  if (toggleHandler) {
-    toggleBtn.removeEventListener('click', toggleHandler);
+    if (toggleHandler) {
+      toggleBtn.removeEventListener('click', toggleHandler);
+    }
+
+    toggleHandler = () => {
+      const mosaicContainer = document.getElementById('mosaic-container');
+
+      if (!mosaicContainer) return;
+
+      const isMosaicVisible =
+        mosaicContainer.dataset.pswpActive === 'true';
+
+      setActiveView(!isMosaicVisible);
+
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    };
+
+    toggleBtn.addEventListener('click', toggleHandler);
+
+    setActiveView(false);
   }
 
-  toggleHandler = () => {
-    const mosaicContainer = document.getElementById('mosaic-container');
+  function cleanupBlogGallery() {
+    cleanupGallery?.();
+    cleanupGallery = null;
 
-    if (!mosaicContainer) return;
+    const toggleBtn = document.getElementById('toggle-gallery-btn');
 
-    const isMosaicVisible =
-      mosaicContainer.dataset.pswpActive === 'true';
+    if (toggleBtn && toggleHandler) {
+      toggleBtn.removeEventListener('click', toggleHandler);
+    }
 
-    setActiveView(!isMosaicVisible);
-
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-  };
-
-  toggleBtn.addEventListener('click', toggleHandler);
-
-  setActiveView(false);
-}
-
-function cleanupBlogGallery() {
-  cleanupGallery?.();
-  cleanupGallery = null;
-
-  const toggleBtn = document.getElementById('toggle-gallery-btn');
-
-  if (toggleBtn && toggleHandler) {
-    toggleBtn.removeEventListener('click', toggleHandler);
+    toggleHandler = null;
   }
 
-  toggleHandler = null;
-}
+  document.addEventListener('astro:page-load', initBlogGallery);
+  document.addEventListener('astro:before-swap', cleanupBlogGallery);
 
-document.addEventListener('astro:page-load', initBlogGallery);
-document.addEventListener('astro:before-swap', cleanupBlogGallery);
-
-initBlogGallery();
-
+  initBlogGallery();
 </script>

@@ -6,7 +6,6 @@ import mediaManifest from '../../data/media-manifest.json';
 import { mediaUrl } from '../../utils/media.js';
 
 const posts = (await getCollection('blog'))
-  .filter((post) => post.id.endsWith('.ca'))
   .sort((a, b) => {
     const dateA = a.data.date?.valueOf() ?? 0;
     const dateB = b.data.date?.valueOf() ?? 0;
@@ -14,7 +13,7 @@ const posts = (await getCollection('blog'))
   });
 
 const postsWithImages = posts.map((post) => {
-  const slug = post.id.replace(/\.ca$/, '').trim();
+  const slug = post.id.trim();
 
   const cover = mediaManifest.find((image) => {
     const normalizedPath = image.path.toLowerCase();

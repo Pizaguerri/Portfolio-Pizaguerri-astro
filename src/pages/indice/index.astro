@@ -6,41 +6,66 @@ import { Image } from 'astro:assets';
 import { Animate } from 'astro-animations';
 import Tags from '../../components/Tags.astro';
 
-const projects = (await getCollection('projects')).filter(p => p.id.endsWith('.ca')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const projects = (await getCollection('projects'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
 const projectItems = projects.map((p) => {
-  const slug = p.id.replace('.ca', '');
+  const slug = p.id.trim();
   const images = import.meta.glob('../../content/projects/**/*.{jpg,jpeg,png,webp}', { eager: true });
-  const imgs = Object.keys(images).filter(k => k.includes(`/projects/${slug}/`)).map(k => images[k].default);
-  imgs.sort((a, b) => a.src.includes('cover') ? -1 : (b.src.includes('cover') ? 1 : 0));
-  const dateStr = p.data.date.toLocaleDateString('ca-ES', { month: 'long', year: 'numeric' });
+  const imgs = Object.keys(images)
+    .filter((k) => k.includes(`/projects/${slug}/`))
+    .map((k) => images[k].default);
+
+  imgs.sort((a, b) =>
+    a.src.includes('cover') ? -1 : (b.src.includes('cover') ? 1 : 0)
+  );
+
+  const dateStr = p.data.date.toLocaleDateString('ca-ES', {
+    month: 'long',
+    year: 'numeric',
+  });
+
   return {
     ...p,
     slug,
     image: imgs[0],
     dateStr: dateStr.charAt(0).toUpperCase() + dateStr.slice(1),
     tag: 'Projecte',
-    tagClass: 'tag-projecte'
+    tagClass: 'tag-projecte',
   };
 });
 
-const posts = (await getCollection('blog')).filter(p => p.id.endsWith('.ca')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const posts = (await getCollection('blog'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
 const postItems = posts.map((p) => {
-  const slug = p.id.replace('.ca', '');
+  const slug = p.id.trim();
   const images = import.meta.glob('../../content/blog/**/*.{jpg,jpeg,png,webp}', { eager: true });
-  const imgs = Object.keys(images).filter(k => k.includes(`/blog/${slug}/`)).map(k => images[k].default);
-  imgs.sort((a, b) => a.src.includes('cover') ? -1 : (b.src.includes('cover') ? 1 : 0));
-  const dateStr = p.data.date.toLocaleDateString('ca-ES', { month: 'long', year: 'numeric' });
+  const imgs = Object.keys(images)
+    .filter((k) => k.includes(`/blog/${slug}/`))
+    .map((k) => images[k].default);
+
+  imgs.sort((a, b) =>
+    a.src.includes('cover') ? -1 : (b.src.includes('cover') ? 1 : 0)
+  );
+
+  const dateStr = p.data.date.toLocaleDateString('ca-ES', {
+    month: 'long',
+    year: 'numeric',
+  });
+
   return {
     ...p,
     slug,
     image: imgs[0],
     dateStr: dateStr.charAt(0).toUpperCase() + dateStr.slice(1),
     tag: 'Editorial',
-    tagClass: 'tag-editorial'
+    tagClass: 'tag-editorial',
   };
 });
 
-const allItems = [...projectItems, ...postItems].sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const allItems = [...projectItems, ...postItems]
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
 
 <BaseLayout title="Index | Pablo Izaguerri">

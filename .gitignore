@@ -60,3 +60,16 @@ Thumbs.db
 *.tmp
 *.bak
 *~
+
+# =========================================
+# Editorial media stored in Cloudflare R2
+# =========================================
+
+/src/content/**/*.jpg
+/src/content/**/*.jpeg
+/src/content/**/*.png
+/src/content/**/*.webp
+/src/content/**/*.gif
+/src/content/**/*.tif
+/src/content/**/*.tiff
+/src/content/**/*.avif

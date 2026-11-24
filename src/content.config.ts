@@ -1,4 +1,3 @@
-
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
@@ -34,7 +33,7 @@ const projects = defineCollection({
     pattern: '**/*.md',
     base: './src/content/projects',
     generateId: ({ entry }) =>
-      entry.replace(/\/index\.([a-z]{2})\.md$/, '.$1'),
+      entry.replace(/\/index\.md$/, ''),
   }),
   schema: portfolioWithCvSchema,
 });
@@ -45,7 +44,7 @@ const blog = defineCollection({
     pattern: '**/*.md',
     base: './src/content/blog',
     generateId: ({ entry }) =>
-      entry.replace(/\/index\.([a-z]{2})\.md$/, '.$1'),
+      entry.replace(/\/index\.md$/, ''),
   }),
   schema: portfolioWithCvSchema,
 });
