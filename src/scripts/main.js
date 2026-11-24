@@ -5,6 +5,8 @@ import "./lightbox.js";
 // 1. ESTADO COMPARTIDO
 // =========================================
 
+const HEADER_SHOW_THRESHOLD = 100;
+
 let lastScrollY = window.scrollY;
 
 // =========================================
@@ -27,7 +29,22 @@ const setMenuState = (isOpen) => {
 };
 
 // =========================================
-// 3. MENÚ MÓVIL
+// 3. VISIBILIDAD DEL HEADER
+// =========================================
+
+const updateHeaderVisibility = () => {
+  const header = document.getElementById("main-header");
+
+  if (!header) return;
+
+  header.classList.toggle(
+    "header-hidden",
+    window.scrollY > HEADER_SHOW_THRESHOLD
+  );
+};
+
+// =========================================
+// 4. MENÚ MÓVIL
 // =========================================
 
 document.addEventListener("click", (event) => {
@@ -54,35 +71,32 @@ document.addEventListener("click", (event) => {
 });
 
 // =========================================
-// 4. SCROLL: MENÚ Y HEADER
+// 5. SCROLL: MENÚ Y HEADER
 // =========================================
 
 window.addEventListener(
   "scroll",
   () => {
+    const currentScrollY = window.scrollY;
+    const scrollingDown = currentScrollY > lastScrollY;
+
     const header = document.getElementById("main-header");
 
     if (!header) return;
-
-    const scrollingDown = window.scrollY > lastScrollY;
 
     if (scrollingDown && header.classList.contains("menu-open")) {
       setMenuState(false);
     }
 
-    if (scrollingDown && window.scrollY > 100) {
-      header.classList.add("header-hidden");
-    } else {
-      header.classList.remove("header-hidden");
-    }
+    updateHeaderVisibility();
 
-    lastScrollY = window.scrollY;
+    lastScrollY = currentScrollY;
   },
   { passive: true }
 );
 
 // =========================================
-// 5. CARGA SUAVE DE IMÁGENES
+// 6. CARGA SUAVE DE IMÁGENES
 // =========================================
 
 const initImageLoading = () => {
@@ -91,12 +105,10 @@ const initImageLoading = () => {
   );
 
   images.forEach((img) => {
-    // Evitar procesar dos veces la misma imagen.
     if (img.dataset.loadingInitialized === "true") return;
 
     img.dataset.loadingInitialized = "true";
 
-    // Las imágenes ya cargadas o en caché aparecen inmediatamente.
     if (img.complete) {
       img.dataset.loading =
         img.naturalWidth > 0 ? "loaded" : "error";
@@ -104,7 +116,6 @@ const initImageLoading = () => {
       return;
     }
 
-    // Las imágenes pendientes comienzan ocultas.
     img.dataset.loading = "true";
 
     img.addEventListener(
@@ -126,7 +137,7 @@ const initImageLoading = () => {
 };
 
 // =========================================
-// 6. REINICIAR ESTADO EN CADA NAVEGACIÓN
+// 7. REINICIAR ESTADO EN CADA NAVEGACIÓN
 // =========================================
 
 document.addEventListener("astro:page-load", () => {
@@ -134,17 +145,17 @@ document.addEventListener("astro:page-load", () => {
 
   lastScrollY = window.scrollY;
 
-  const header = document.getElementById("main-header");
-  header?.classList.remove("header-hidden");
+  updateHeaderVisibility();
 
   initImageLoading();
 });
 
 // Primera carga de la página.
+updateHeaderVisibility();
 initImageLoading();
 
 // =========================================
-// 7. PROTECCIÓN DE IMÁGENES
+// 8. PROTECCIÓN DE IMÁGENES
 // =========================================
 
 const isImageTarget = (target) => {

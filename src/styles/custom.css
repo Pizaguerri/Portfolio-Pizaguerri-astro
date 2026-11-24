@@ -22,7 +22,7 @@ body {
   backdrop-filter: blur(0);
   -webkit-backdrop-filter: blur(0);
   overflow: visible !important;
-  transition: transform 0.35s ease;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .site-header.header-hidden {
@@ -223,6 +223,7 @@ body {
     grid-row: 1;
     justify-self: end;
     margin-left: 0;
+    transform: translateX(23px);
     z-index: 1100;
   }
 
@@ -230,7 +231,7 @@ body {
   .mobile-nav {
     display: flex;
     position: absolute;
-    right: 5rem;
+    right: calc(4.2rem - 23px);
     top: 50%;
     transform: translateY(-50%);
     width: 0;
@@ -252,7 +253,7 @@ body {
     flex-direction: row;
     align-items: center;
     justify-content: flex-end;
-    gap: clamp(0.75rem, 3vw, 1.5rem);
+    gap: clamp(1rem, 4vw, 1.75rem);
     list-style: none;
     margin: 0;
     padding: 0;
