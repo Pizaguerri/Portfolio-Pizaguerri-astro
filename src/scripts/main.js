@@ -35,7 +35,6 @@ document.addEventListener("click", (event) => {
 
   if (!(target instanceof Element)) return;
 
-  // Abrir o cerrar mediante el botón.
   const button = target.closest("#menu-toggle");
 
   if (button) {
@@ -47,14 +46,12 @@ document.addEventListener("click", (event) => {
     return;
   }
 
-  // Cerrar al seleccionar un enlace del menú.
   const menuLink = target.closest("#menu a");
 
   if (menuLink) {
     setMenuState(false);
   }
 });
-
 
 // =========================================
 // 4. SCROLL: MENÚ Y HEADER
@@ -69,12 +66,10 @@ window.addEventListener(
 
     const scrollingDown = window.scrollY > lastScrollY;
 
-    // Cerrar el menú al desplazarse hacia abajo.
     if (scrollingDown && header.classList.contains("menu-open")) {
       setMenuState(false);
     }
 
-    // Ocultar al bajar y mostrar al subir.
     if (scrollingDown && window.scrollY > 100) {
       header.classList.add("header-hidden");
     } else {
@@ -86,9 +81,52 @@ window.addEventListener(
   { passive: true }
 );
 
+// =========================================
+// 5. CARGA SUAVE DE IMÁGENES
+// =========================================
+
+const initImageLoading = () => {
+  const images = document.querySelectorAll(
+    "img:not(.pswp__item img)"
+  );
+
+  images.forEach((img) => {
+    // Evitar procesar dos veces la misma imagen.
+    if (img.dataset.loadingInitialized === "true") return;
+
+    img.dataset.loadingInitialized = "true";
+
+    // Las imágenes ya cargadas o en caché aparecen inmediatamente.
+    if (img.complete) {
+      img.dataset.loading =
+        img.naturalWidth > 0 ? "loaded" : "error";
+
+      return;
+    }
+
+    // Las imágenes pendientes comienzan ocultas.
+    img.dataset.loading = "true";
+
+    img.addEventListener(
+      "load",
+      () => {
+        img.dataset.loading = "loaded";
+      },
+      { once: true }
+    );
+
+    img.addEventListener(
+      "error",
+      () => {
+        img.dataset.loading = "error";
+      },
+      { once: true }
+    );
+  });
+};
 
 // =========================================
-// 5. REINICIAR ESTADO EN CADA NAVEGACIÓN
+// 6. REINICIAR ESTADO EN CADA NAVEGACIÓN
 // =========================================
 
 document.addEventListener("astro:page-load", () => {
@@ -98,10 +136,15 @@ document.addEventListener("astro:page-load", () => {
 
   const header = document.getElementById("main-header");
   header?.classList.remove("header-hidden");
+
+  initImageLoading();
 });
 
+// Primera carga de la página.
+initImageLoading();
+
 // =========================================
-// 6. PROTECCIÓN DE IMÁGENES
+// 7. PROTECCIÓN DE IMÁGENES
 // =========================================
 
 const isImageTarget = (target) => {
@@ -114,7 +157,6 @@ const isImageTarget = (target) => {
   return Boolean(link?.querySelector("img"));
 };
 
-// Bloquear menú contextual sobre imágenes y sus enlaces.
 document.addEventListener(
   "contextmenu",
   (event) => {
@@ -125,7 +167,6 @@ document.addEventListener(
   true
 );
 
-// Bloquear arrastre sobre imágenes y sus enlaces.
 document.addEventListener(
   "dragstart",
   (event) => {

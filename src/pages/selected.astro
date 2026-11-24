@@ -1,17 +1,15 @@
 
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { Image } from 'astro:assets';
+import mediaManifest from '../data/media-manifest.json';
+import { mediaUrl } from '../utils/media.js';
 
-const allSelectedImages = import.meta.glob(
-  '../content/selected/**/*.{jpg,jpeg,png,webp}',
-  { eager: true }
-);
-
-const selectedItems = Object.keys(allSelectedImages)
-  .sort()
-  .map((path) => ({
-    src: allSelectedImages[path].default,
+const selectedItems = mediaManifest
+  .filter((image) => image.path.toLowerCase().startsWith('selected/'))
+  .sort((a, b) => a.path.localeCompare(b.path))
+  .map((image) => ({
+    ...image,
+    url: mediaUrl(image.path),
   }));
 ---
 
@@ -20,7 +18,6 @@ const selectedItems = Object.keys(allSelectedImages)
     class="site-container"
     style="padding-top: 0; padding-bottom: 4rem; position: relative; z-index: 1;"
   >
-
     <header class="selected-header">
       <h1>Senzills</h1>
     </header>
@@ -31,21 +28,21 @@ const selectedItems = Object.keys(allSelectedImages)
     >
       {selectedItems.map((item) => (
         <a
-          href={item.src.src}
+          href={item.url}
           class="grid-item post-gallery-item gallery-item"
-          data-pswp-width={item.src.width}
-          data-pswp-height={item.src.height}
+          data-pswp-width={item.width}
+          data-pswp-height={item.height}
         >
-          <Image
-            src={item.src}
+          <img
+            src={item.url}
             alt=""
-            widths={[400, 800, 1200, 1600]}
-            sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            width={item.width}
+            height={item.height}
+            loading="lazy"
           />
         </a>
       ))}
     </div>
-
   </div>
 </BaseLayout>
 

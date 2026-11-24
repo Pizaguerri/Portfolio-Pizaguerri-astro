@@ -12,7 +12,7 @@ Em dic Pablo Izaguerri, Mallorca 1995, però visc a Catalunya des del 2018.  En 
 
 M'apasiona la música, pel qual vaig poder crear el meu propi projecte de recomanacions de discos diàries, **Sonomada**; i després he pogut col·laborar amb mitjans com **S'altra Música**, **Enderrock**, **Binaural** o **Nuevas Frecuencias**, ja mitjançant la fotografia. 
 
-<img src="/images/about3.jpg" class="" alt="Foto de Pablo Izaguerri">
+![Foto de Pablo Izaguerri](about3.jpg)
 
 Em considero *fotògraf documental*, tot i que amb els anys, em fa gràcia pensar que els temes que he tractat s'han anat retrobant amb sa mateixa pregunta que em feia als inicis. *Qué i qui som?* 
 

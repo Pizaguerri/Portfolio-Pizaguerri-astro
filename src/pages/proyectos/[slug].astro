@@ -2,11 +2,12 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { Image, getImage } from 'astro:assets';
 import Expos from '../../components/expos.astro';
 import Disclosure from '../../components/Disclosure.astro';
 import Tags from '../../components/Tags.astro';
 import { useTranslations } from '../../i18n/utils';
+import mediaManifest from '../../data/media-manifest.json';
+import { mediaUrl } from '../../utils/media.js';
 
 const t = useTranslations('ca');
 
@@ -29,9 +30,10 @@ const slug = project.id
   .trim()
   .toLowerCase();
 
-const allImages = import.meta.glob(
-  '../../content/projects/**/*.{jpg,jpeg,png,webp}',
-  { eager: true }
+const englishSummary = project.data.summary_en?.trim();
+
+const projectImages = mediaManifest.filter((image) =>
+  image.path.toLowerCase().startsWith(`projects/${slug}/`)
 );
 
 const isCover = (path) => {
@@ -45,33 +47,42 @@ const isCover = (path) => {
   ].includes(fileName);
 };
 
-const projectImagePaths = Object.keys(allImages).filter((path) =>
-  path.toLowerCase().includes(`/projects/${slug}/`)
-);
-
-
-const galleryPaths = projectImagePaths
-  .filter((path) => !isCover(path))
-  .sort();
-
-const optimizeImage = async (path) => {
-  const src = allImages[path].default;
-  const optimized = await getImage({ src });
-
-  return {
-    src,
-    width: optimized.attributes.width,
-    height: optimized.attributes.height,
-  };
-};
-
-const galleryImages = await Promise.all(
-  galleryPaths.map(optimizeImage)
-);
+const galleryImages = projectImages
+  .filter((image) => !isCover(image.path))
+  .sort((a, b) => a.path.localeCompare(b.path))
+  .map((image) => ({
+    ...image,
+    url: mediaUrl(image.path),
+  }));
 
 const sliderImages = galleryImages;
 
-const englishSummary = project.data.summary_en?.trim();
+function getMarkdownImage(props) {
+  const rawSrc = typeof props.src === 'string'
+    ? props.src
+    : props.src?.src ?? '';
+
+  const filename = rawSrc
+    .split(/[?#]/)[0]
+    .split('/')
+    .pop();
+
+  const image = projectImages.find((item) =>
+    item.path.toLowerCase().endsWith(`/${filename.toLowerCase()}`)
+  );
+
+  if (!image) {
+    throw new Error(
+      `No se encontró en el manifiesto la imagen Markdown "${filename}" del proyecto "${slug}".`
+    );
+  }
+
+  return {
+    src: mediaUrl(image.path),
+    width: image.width,
+    height: image.height,
+  };
+}
 ---
 
 <BaseLayout
@@ -87,13 +98,13 @@ const englishSummary = project.data.summary_en?.trim();
       <div class="slider-track" id="slider-track">
         {sliderImages.map((img, index) => (
           <a
-            href={img.src.src}
+            href={img.url}
             class="slider-item"
             data-pswp-width={img.width}
             data-pswp-height={img.height}
           >
-            <Image
-              src={img.src}
+            <img
+              src={img.url}
               alt=""
               width={img.width}
               height={img.height}
@@ -120,18 +131,17 @@ const englishSummary = project.data.summary_en?.trim();
         >
           {galleryImages.map((img) => (
             <a
-              href={img.src.src}
+              href={img.url}
               class="post-gallery-item gallery-item project-mosaic-item"
               data-pswp-width={img.width}
               data-pswp-height={img.height}
             >
-              <Image
-                src={img.src}
+              <img
+                src={img.url}
                 alt=""
-                widths={[400, 800, 1200]}
-                sizes="(max-width: 800px) 100vw, 50vw"
                 width={img.width}
                 height={img.height}
+                loading="lazy"
               />
             </a>
           ))}
@@ -225,14 +235,21 @@ const englishSummary = project.data.summary_en?.trim();
         <div class="prose">
           <Content
             components={{
-              img: (props) => (
-                <Image
-                  {...props}
-                  widths={[800, 1200]}
-                  sizes="(max-width: 800px) 100vw, 800px"
-                  style="width: 100%; height: auto; border-radius: 0; margin: 2rem 0;"
-                />
-              ),
+              img: (props) => {
+                const image = getMarkdownImage(props);
+
+                return (
+                  <img
+                    src={image.src}
+                    alt={props.alt ?? ''}
+                    title={props.title}
+                    width={image.width}
+                    height={image.height}
+                    loading="lazy"
+                    style="width: 100%; height: auto; border-radius: 0; margin: 2rem 0;"
+                  />
+                );
+              },
             }}
           />
         </div>
@@ -398,7 +415,6 @@ const englishSummary = project.data.summary_en?.trim();
 </style>
 
 <script>
-
 import { initJustifiedGallery } from '../../scripts/gallery.js';
 
 let cleanupGallery = null;
@@ -450,7 +466,6 @@ function setActiveView(isMosaic) {
 }
 
 function initProjectGallery() {
-  // Evita que este script se ejecute en las páginas del blog.
   const gallery = document.getElementById('project-mosaic-gallery');
 
   if (!gallery) return;
@@ -504,5 +519,4 @@ document.addEventListener('astro:page-load', initProjectGallery);
 document.addEventListener('astro:before-swap', cleanupProjectGallery);
 
 initProjectGallery();
-
 </script>

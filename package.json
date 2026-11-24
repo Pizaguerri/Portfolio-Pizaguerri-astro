@@ -6,9 +6,12 @@
     "node": ">=22.23.4"
   },
   "scripts": {
+    "predev": "node src/scripts/generate-media-manifest.js",
     "dev": "astro dev",
+    "prebuild": "node src/scripts/generate-media-manifest.js",
     "build": "astro build",
     "preview": "astro preview",
+    "deploy": "npm run build && wrangler deploy",
     "astro": "astro"
   },
   "dependencies": {
@@ -17,6 +20,7 @@
     "astro-animations": "^0.0.7"
   },
   "devDependencies": {
-    "sass": "^1.107.1"
+    "sass": "^1.107.1",
+    "wrangler": "^4.167.0"
   }
 }

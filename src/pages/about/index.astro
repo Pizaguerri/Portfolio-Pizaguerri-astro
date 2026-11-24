@@ -2,7 +2,7 @@
 ---
 import { getEntry, getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { Image } from 'astro:assets';
+import AboutImage from '../../components/AboutImage.astro';
 import { buildCV } from '../../utils/cv';
 import CVCategory from '../../components/CVCategory.astro';
 
@@ -46,14 +46,7 @@ const fullCV = buildCV(allEntries, manualCV);
     <div class="prose">
       <AboutContent
         components={{
-          img: (props) => (
-            <Image
-              {...props}
-              widths={[800, 1200]}
-              sizes="(max-width: 800px) 100vw, 800px"
-              style="width: 100%; height: auto; border-radius: 0; margin: 2rem 0;"
-            />
-          ),
+          img: AboutImage,
         }}
       />
 
@@ -77,14 +70,7 @@ const fullCV = buildCV(allEntries, manualCV);
 
       <AboutAfterContent
         components={{
-          img: (props) => (
-            <Image
-              {...props}
-              widths={[800, 1200]}
-              sizes="(max-width: 800px) 100vw, 800px"
-              style="width: 100%; height: auto; border-radius: 0; margin: 2rem 0;"
-            />
-          ),
+          img: AboutImage,
         }}
       />
     </div>

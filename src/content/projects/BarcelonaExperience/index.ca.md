@@ -23,6 +23,8 @@ El turismo supone una actividad **pasiva disfrazada de experiencia** con el indi
 
 ![](barcelonaexperience-2.jpg)
 
+https://media.pabloizaguerri.org/projects/BarcelonaExperience/barcelonaexperience-2.jpg
+
 ## Barcelona como marca global
 
 El posicionamiento de Barcelona como **ciudad global** atrae inversiones de diferentes fuentes. La marca “Barcelona”, registrada en 2011 y anulada después, sirvió para proyectar la ciudad comercialmente, aunque en la práctica se convirtió en una herramienta de **explotación del nombre**. Proyectar una imagen concreta de la ciudad, que poco o nada tiene que ver con la realidad de sus habitantes, genera consecuencias cotidianas: turistas y empresas forman una suerte de parque temático que vive alejado de los barceloneses, supeditándolos a servir y gestionar sus vidas al margen de la idealización de una ciudad que les da la espalda.

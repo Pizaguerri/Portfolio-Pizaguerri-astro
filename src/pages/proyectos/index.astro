@@ -2,7 +2,8 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { Image } from 'astro:assets';
+import mediaManifest from '../../data/media-manifest.json';
+import { mediaUrl } from '../../utils/media.js';
 
 const projects = (await getCollection('projects'))
   .filter((project) => project.id.endsWith('.ca'))
@@ -12,31 +13,29 @@ const projects = (await getCollection('projects'))
     return dateB - dateA;
   });
 
-const images = import.meta.glob(
-  '../../content/projects/**/*.{jpg,jpeg,png,webp}',
-  { eager: true }
-);
-
 const projectsWithImages = projects.map((project) => {
-  const slug = project.id.replace(/\.ca$/, '');
+  const slug = project.id.replace(/\.ca$/, '').trim();
 
-  const projectImages = Object.keys(images)
-    .filter((path) => path.includes(`/projects/${slug}/`))
-    .map((path) => images[path].default);
+  const cover = mediaManifest.find((image) => {
+    const normalizedPath = image.path.toLowerCase();
+    const filename = normalizedPath.split('/').pop();
 
-  projectImages.sort((a, b) => {
-    const aIsCover = a.src.includes('cover');
-    const bIsCover = b.src.includes('cover');
-
-    if (aIsCover && !bIsCover) return -1;
-    if (!aIsCover && bIsCover) return 1;
-    return 0;
+    return (
+      normalizedPath.startsWith(`projects/${slug.toLowerCase()}/`) &&
+      /^cover\.(jpg|jpeg|png|webp)$/.test(filename)
+    );
   });
 
   return {
     ...project,
     slug,
-    image: projectImages[0],
+    image: cover
+      ? {
+          src: mediaUrl(cover.path),
+          width: cover.width,
+          height: cover.height,
+        }
+      : null,
   };
 });
 ---
@@ -58,11 +57,12 @@ const projectsWithImages = projects.map((project) => {
             href={`/proyectos/${project.slug}`}
             class="grid-item gallery-item"
           >
-            <Image
-              src={project.image}
+            <img
+              src={project.image.src}
               alt={project.data.title}
-              widths={[400, 800, 1200]}
-              sizes="(max-width: 1200px) 50vw, 33vw"
+              width={project.image.width}
+              height={project.image.height}
+              loading="lazy"
             />
           </a>
         )

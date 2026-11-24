@@ -984,3 +984,26 @@ img {
     right: 0.5rem;
   }
 }
+
+
+
+/* =========================================
+   IMAGE LOADING — TRANSICIÓN SUAVE
+   ========================================= */
+
+img[data-loading="true"] {
+  opacity: 0;
+}
+
+img[data-loading="loaded"] {
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  img[data-loading="true"],
+  img[data-loading="loaded"] {
+    opacity: 1;
+    transition: none;
+  }
+}

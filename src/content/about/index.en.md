@@ -11,7 +11,7 @@ My name is Pablo Izaguerri, born in Mallorca in 1995, but living in Catalonia si
 
 Music has always been a passion — it led me to create **Sonomada**, a daily record recommendation project; and later to collaborate with outlets such as **S'altra Música**, **Enderrock**, **Binaural** and **Nuevas Frecuencias**, this time through photography.
 
-<img src="/images/about3.jpg" class="" alt="Pablo Izaguerri photo">
+<img src="about3.jpg" class="" alt="Foto de Pablo Izaguerri">
 
 I think of myself as a _documentary photographer_, though over the years I've come to notice that the subjects I've worked on keep circling back to the same question I asked myself at the beginning. _Who and what are we?_
 

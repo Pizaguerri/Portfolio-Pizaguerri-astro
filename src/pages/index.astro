@@ -1,61 +1,99 @@
+
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { Animate } from 'astro-animations';
+import mediaManifest from '../data/media-manifest.json';
+import { mediaUrl } from '../utils/media.js';
 
 // 1. Selected (siempre primero)
-const selectedImagesRaw = import.meta.glob('../content/selected/**/*.{jpg,jpeg,png,webp}', { eager: true });
-const selectedGroups = {};
-for (const path in selectedImagesRaw) {
-  const parts = path.split('/');
-  const folderName = parts[parts.length - 2]; 
-  if (!selectedGroups[folderName]) selectedGroups[folderName] = [];
-  selectedGroups[folderName].push(selectedImagesRaw[path].default);
-}
-const selectedItems = Object.keys(selectedGroups).map(folderName => ({
-  type: 'selected', 
-  title: 'Senzills', 
-  slug: folderName, 
-  images: selectedGroups[folderName].slice(0, 5),
-  tag: null, // Selected no tiene tag
-  tagColor: null
-}));
+const selectedImages = mediaManifest
+  .filter((image) => image.path.toLowerCase().startsWith('selected/'))
+  .sort((a, b) => a.path.localeCompare(b.path));
+
+const selectedItems = selectedImages.length
+  ? [{
+      type: 'selected',
+      title: 'Senzills',
+      slug: 'selected',
+      images: selectedImages.slice(0, 5).map((image) => ({
+        ...image,
+        src: mediaUrl(image.path),
+      })),
+      tag: null,
+      tagColor: null,
+    }]
+  : [];
 
 // 2. Proyectos (orden: más reciente → más antigua)
-const projects = (await getCollection('projects')).filter(p => p.id.endsWith('.ca')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const projects = (await getCollection('projects'))
+  .filter((p) => p.id.endsWith('.ca'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
 const projectImages = projects.map((p) => {
-  const slug = p.id.replace('.ca', '');
-  const images = import.meta.glob('../content/projects/**/*.{jpg,jpeg,png,webp}', { eager: true });
-  const imgs = Object.keys(images).filter(k => k.includes(`/projects/${slug}/`) && !k.includes('cover')).map(k => images[k].default);
-  return { 
-    type: 'project', 
-    title: p.data.title, 
-    slug: slug, 
-    images: imgs.slice(0, 5),
-  }; 
+  const slug = p.id.replace(/\.ca$/, '').trim();
+
+  const images = mediaManifest
+    .filter((image) =>
+      image.path.toLowerCase().startsWith(`projects/${slug.toLowerCase()}/`)
+    )
+    .filter((image) => {
+      const filename = image.path.split('/').pop().toLowerCase();
+      return !/^cover\.(jpg|jpeg|png|webp)$/.test(filename);
+    })
+    .sort((a, b) => a.path.localeCompare(b.path))
+    .slice(0, 5)
+    .map((image) => ({
+      ...image,
+      src: mediaUrl(image.path),
+    }));
+
+  return {
+    type: 'project',
+    title: p.data.title,
+    slug,
+    images,
+  };
 });
 
 // 3. Blog (orden: más reciente → más antigua)
-const posts = (await getCollection('blog')).filter(p => p.id.endsWith('.ca')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const posts = (await getCollection('blog'))
+  .filter((p) => p.id.endsWith('.ca'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
 const postImages = posts.map((p) => {
-  const slug = p.id.replace('.ca', '');
-  const images = import.meta.glob('../content/blog/**/*.{jpg,jpeg,png,webp}', { eager: true });
-  const imgs = Object.keys(images).filter(k => k.includes(`/blog/${slug}/`)).map(k => images[k].default);
-  return { 
-    type: 'blog', 
-    title: p.data.title, 
-    slug: slug, 
-    images: imgs.slice(0, 5),
-  }; 
+  const slug = p.id.replace(/\.ca$/, '').trim();
+
+  const images = mediaManifest
+    .filter((image) =>
+      image.path.toLowerCase().startsWith(`blog/${slug.toLowerCase()}/`)
+    )
+    .filter((image) => {
+      const filename = image.path.split('/').pop().toLowerCase();
+      return !/^cover\.(jpg|jpeg|png|webp)$/.test(filename);
+    })
+    .sort((a, b) => a.path.localeCompare(b.path))
+    .slice(0, 5)
+    .map((image) => ({
+      ...image,
+      src: mediaUrl(image.path),
+    }));
+
+  return {
+    type: 'blog',
+    title: p.data.title,
+    slug,
+    images,
+  };
 });
 
-// Unimos todo: Selected primero, luego proyectos (cronológico), luego blog (cronológico)
+// Unimos todo: Selected primero, luego proyectos y blog
 const allRows = [...selectedItems, ...projectImages, ...postImages];
 ---
 
 <BaseLayout title="PABLO IZAGUERRI | Fotografía, Antropologia">
   <div class="site-container" style="padding-top: 2rem;">
-    
+
     <!-- Introducción -->
     <header class="home-intro">
       <p>De Mallorca a Barcelona. Fotògraf documental, antropòleg visual i una mica més.</p>
@@ -64,36 +102,81 @@ const allRows = [...selectedItems, ...projectImages, ...postImages];
     <!-- Filas de fotos -->
     <div class="home-rows">
       {allRows.map((row, index) => {
-        // Determinamos la URL según el tipo
-        const href = row.type === 'project' ? `/proyectos/${row.slug}` : row.type === 'blog' ? `/blog/${row.slug}` : `/selected`;
+        const href =
+          row.type === 'project'
+            ? `/proyectos/${row.slug}`
+            : row.type === 'blog'
+              ? `/blog/${row.slug}`
+              : '/selected';
 
         return index < 2 ? (
           <a href={href} class="home-row">
-            <div class="home-row-scroll" style="display: flex; flex-direction: row; gap: 0.5rem; overflow-x: auto; width: 100%; scrollbar-width: none;">
+            <div
+              class="home-row-scroll"
+              style="display: flex; flex-direction: row; gap: 0.5rem; overflow-x: auto; width: 100%; scrollbar-width: none;"
+            >
               {row.images.map((img, i) => (
-                <img key={i} src={img.src} alt={row.title} loading="lazy" style="height: 340px; width: auto; flex-shrink: 0; display: block; object-fit: cover;" />
+                <img
+                  key={i}
+                  src={img.src}
+                  alt={row.title}
+                  width={img.width}
+                  height={img.height}
+                  loading="lazy"
+                  style="height: 340px; width: auto; flex-shrink: 0; display: block; object-fit: cover;"
+                />
               ))}
             </div>
-            <div style="display: flex; flex-direction: column; align-items: center; margin-top: 1rem;">
+
+            <div
+              style="display: flex; flex-direction: column; align-items: center; margin-top: 1rem;"
+            >
               {row.tag && (
-                <span class={`home-tag ${row.tagColor}`}>{row.tag}</span>
+                <span class={`home-tag ${row.tagColor}`}>
+                  {row.tag}
+                </span>
               )}
-              <span class="home-row-title" style="margin-top: 0.5rem;">{row.title}</span>
+              <span class="home-row-title" style="margin-top: 0.5rem;">
+                {row.title}
+              </span>
             </div>
           </a>
         ) : (
-          <Animate type="slide" direction="up" duration={1000} easing="ease-out">
+          <Animate
+            type="slide"
+            direction="up"
+            duration={1000}
+            easing="ease-out"
+          >
             <a href={href} class="home-row">
-              <div class="home-row-scroll" style="display: flex; flex-direction: row; gap: 0.5rem; overflow-x: auto; width: 100%; scrollbar-width: none;">
+              <div
+                class="home-row-scroll"
+                style="display: flex; flex-direction: row; gap: 0.5rem; overflow-x: auto; width: 100%; scrollbar-width: none;"
+              >
                 {row.images.map((img, i) => (
-                  <img key={i} src={img.src} alt={row.title} loading="lazy" style="height: 340px; width: auto; flex-shrink: 0; display: block; object-fit: cover;" />
+                  <img
+                    key={i}
+                    src={img.src}
+                    alt={row.title}
+                    width={img.width}
+                    height={img.height}
+                    loading="lazy"
+                    style="height: 340px; width: auto; flex-shrink: 0; display: block; object-fit: cover;"
+                  />
                 ))}
               </div>
-              <div style="display: flex; flex-direction: column; align-items: center; margin-top: 1rem;">
+
+              <div
+                style="display: flex; flex-direction: column; align-items: center; margin-top: 1rem;"
+              >
                 {row.tag && (
-                  <span class={`home-tag ${row.tagColor}`}>{row.tag}</span>
+                  <span class={`home-tag ${row.tagColor}`}>
+                    {row.tag}
+                  </span>
                 )}
-                <span class="home-row-title" style="margin-top: 0.5rem;">{row.title}</span>
+                <span class="home-row-title" style="margin-top: 0.5rem;">
+                  {row.title}
+                </span>
               </div>
             </a>
           </Animate>
@@ -111,6 +194,7 @@ const allRows = [...selectedItems, ...projectImages, ...postImages];
     margin-left: auto;
     margin-right: auto;
   }
+
   .home-intro p {
     font-size: 1.1rem;
     color: var(--text-2);

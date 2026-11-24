@@ -1,0 +1,28 @@
+
+---
+import mediaManifest from '../data/media-manifest.json';
+import { mediaUrl } from '../utils/media.js';
+
+const { src, alt = '' } = Astro.props;
+
+const filename = src.split('/').pop();
+
+const image = mediaManifest.find(
+  (item) => item.path === `about/${filename}`
+);
+
+if (!image) {
+  throw new Error(`Imagen de About no encontrada en el manifiesto: ${src}`);
+}
+
+const imageUrl = mediaUrl(image.path);
+---
+
+<img
+  src={imageUrl}
+  alt={alt}
+  width={image.width}
+  height={image.height}
+  loading="lazy"
+  style="width: 100%; height: auto; border-radius: 0; margin: 2rem 0;"
+/>
