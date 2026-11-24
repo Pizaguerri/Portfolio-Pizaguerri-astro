@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 # ============================================================
@@ -34,6 +35,13 @@ DEV_PID=""
 SYNC_PREVIEW=""
 HAS_CONTENT_CHANGES=false
 
+# Opciones compartidas por la simulación y la sincronización real.
+# Evitan copiar archivos .DS_Store y modificar fechas de directorios.
+RSYNC_OPTIONS=(
+  --exclude='.DS_Store'
+  --omit-dir-times
+)
+
 # --- FUNCIONES ---
 
 error() {
@@ -69,30 +77,20 @@ cleanup() {
   fi
 }
 
+# Comprueba que todos los cambios Git estén dentro
+# de las rutas permitidas para el flujo editorial.
 check_git_changes() {
-  local unexpected_changes=()
+  local unexpected_changes
 
-  while IFS= read -r line; do
+  unexpected_changes=$(git status --porcelain --untracked-files=all -- \
+    . \
+    ':(exclude)src/content' \
+    ':(exclude)src/data/media-manifest.json' \
+    ':(exclude)publicar-portfolio.command' \
+    ':(exclude)sync-content.sh' \
+    ':(exclude).gitignore')
 
-    [[ -z "$line" ]] && continue
-
-    local path="${line:3}"
-
-    case "$path" in
-      src/content|src/content/*)
-        ;;
-      "$MANIFEST_FILE")
-        ;;
-      publicar-portfolio.command|sync-content.sh)
-        ;;
-      *)
-        unexpected_changes+=("$line")
-        ;;
-    esac
-
-  done < <(git status --porcelain --untracked-files=all)
-
-  if [[ "${#unexpected_changes[@]}" -gt 0 ]]; then
+  if [[ -n "$unexpected_changes" ]]; then
 
     echo ""
     echo "ATENCIÓN: hay cambios ajenos al contenido editorial."
@@ -101,11 +99,27 @@ check_git_changes() {
     echo "locales que no estén preparados para publicarse."
     echo ""
 
-    printf '%s\n' "${unexpected_changes[@]}"
+    printf '%s\n' "$unexpected_changes"
 
     echo ""
     echo "Revisa estos archivos antes de volver a publicar."
 
+    return 1
+  fi
+
+  return 0
+}
+
+# Comprueba que el índice de Git esté limpio.
+# Evita mezclar cambios preparados anteriormente
+# con el commit editorial.
+check_git_index() {
+  if ! git diff --cached --quiet; then
+    echo ""
+    echo "ERROR: hay cambios preparados en el índice de Git."
+    echo ""
+    echo "El sincronizador necesita un índice limpio."
+    echo "Registra o retira esos cambios antes de continuar."
     return 1
   fi
 
@@ -134,8 +148,9 @@ echo ""
 [[ -f "$ASTRO_REPO/wrangler.jsonc" ]] || error "No se encuentra wrangler.jsonc."
 [[ -f "$ASTRO_REPO/$MANIFEST_SCRIPT" ]] || error "No se encuentra el generador del manifiesto."
 
-OBSIDIAN_FILE_COUNT=$(find "$OBSIDIAN_SOURCE" -type f | wc -l | tr -d ' ')
-ASTRO_FILE_COUNT=$(find "$CONTENT_DEST" -type f | wc -l | tr -d ' ')
+# Recuento de archivos excluyendo los metadatos de macOS.
+OBSIDIAN_FILE_COUNT=$(find "$OBSIDIAN_SOURCE" -type f ! -name '.DS_Store' | wc -l | tr -d ' ')
+ASTRO_FILE_COUNT=$(find "$CONTENT_DEST" -type f ! -name '.DS_Store' | wc -l | tr -d ' ')
 
 [[ "$OBSIDIAN_FILE_COUNT" -gt 0 ]] || error "La carpeta de Obsidian está vacía."
 
@@ -153,6 +168,7 @@ command -v rsync >/dev/null 2>&1 || error "No se encuentra rsync."
 command -v rclone >/dev/null 2>&1 || error "No se encuentra rclone."
 command -v npm >/dev/null 2>&1 || error "No se encuentra npm."
 command -v node >/dev/null 2>&1 || error "No se encuentra node."
+command -v curl >/dev/null 2>&1 || error "No se encuentra curl."
 
 echo "Archivos en Obsidian: $OBSIDIAN_FILE_COUNT"
 echo "Archivos en Astro:    $ASTRO_FILE_COUNT"
@@ -161,6 +177,9 @@ echo "Validaciones iniciales completadas."
 
 # Comprobar que no haya cambios ajenos al contenido.
 check_git_changes || exit 1
+
+# No comenzar con cambios previamente preparados.
+check_git_index || exit 1
 
 # --- SIMULACIÓN DE SINCRONIZACIÓN ---
 
@@ -176,6 +195,7 @@ echo ""
 SYNC_PREVIEW=$(mktemp)
 
 rsync -ani --delete \
+  "${RSYNC_OPTIONS[@]}" \
   "$OBSIDIAN_SOURCE/" \
   "$CONTENT_DEST/" | tee "$SYNC_PREVIEW"
 
@@ -224,6 +244,7 @@ echo "============================================================"
 echo ""
 
 rsync -av --delete \
+  "${RSYNC_OPTIONS[@]}" \
   "$OBSIDIAN_SOURCE/" \
   "$CONTENT_DEST/"
 
@@ -383,7 +404,8 @@ echo " PUBLICANDO EN GITHUB"
 echo "============================================================"
 echo ""
 
-git add src/content/ "$MANIFEST_FILE"
+# Preparar exclusivamente contenido y manifiesto.
+git add -A -- src/content/ "$MANIFEST_FILE"
 
 if git diff --cached --quiet; then
 
@@ -397,7 +419,7 @@ else
     COMMIT_MSG="content: sync desde Obsidian $(date +'%Y-%m-%d %H:%M')"
   fi
 
-  git commit -m "$COMMIT_MSG"
+  git commit -m "$COMMIT_MSG" -- src/content/ "$MANIFEST_FILE"
 
 fi
 
