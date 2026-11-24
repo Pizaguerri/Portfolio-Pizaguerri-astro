@@ -37,6 +37,13 @@ const updateHeaderVisibility = () => {
 
   if (!header) return;
 
+  const isMobile = window.matchMedia("(max-width: 768px)").matches;
+
+  if (isMobile) {
+    header.classList.toggle("header-hidden", window.scrollY > 0);
+    return;
+  }
+
   header.classList.toggle(
     "header-hidden",
     window.scrollY > HEADER_SHOW_THRESHOLD
