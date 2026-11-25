@@ -3,40 +3,12 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import mediaManifest from '../../data/media-manifest.json';
-import { mediaUrl } from '../../utils/media.js';
+import { getProjectsWithCovers } from '../../utils/projects.js';
 
-const projects = (await getCollection('projects'))
-  .sort((a, b) => {
-    const dateA = a.data.date?.valueOf() ?? 0;
-    const dateB = b.data.date?.valueOf() ?? 0;
-    return dateB - dateA;
-  });
-
-const projectsWithImages = projects.map((project) => {
-  const slug = project.id.trim();
-
-  const cover = mediaManifest.find((image) => {
-    const normalizedPath = image.path.toLowerCase();
-    const filename = normalizedPath.split('/').pop();
-
-    return (
-      normalizedPath.startsWith(`projects/${slug.toLowerCase()}/`) &&
-      /^cover\.(jpg|jpeg|png|webp)$/.test(filename)
-    );
-  });
-
-  return {
-    ...project,
-    slug,
-    image: cover
-      ? {
-          src: mediaUrl(cover.path),
-          width: cover.width,
-          height: cover.height,
-        }
-      : null,
-  };
-});
+const projectsWithImages = getProjectsWithCovers(
+  await getCollection('projects'),
+  mediaManifest
+);
 ---
 
 <BaseLayout title="Projectes | Pablo Izaguerri">
@@ -51,20 +23,18 @@ const projectsWithImages = projects.map((project) => {
       class="justified-grid justified-gallery"
     >
       {projectsWithImages.map((project) => (
-        project.image && (
-          <a
-            href={`/proyectos/${project.slug}`}
-            class="grid-item gallery-item"
-          >
-            <img
-              src={project.image.src}
-              alt={project.data.title}
-              width={project.image.width}
-              height={project.image.height}
-              loading="lazy"
-            />
-          </a>
-        )
+        <a
+          href={`/proyectos/${project.slug}`}
+          class="grid-item gallery-item"
+        >
+          <img
+            src={project.image.src}
+            alt={project.data.title}
+            width={project.image.width}
+            height={project.image.height}
+            loading="lazy"
+          />
+        </a>
       ))}
     </div>
 

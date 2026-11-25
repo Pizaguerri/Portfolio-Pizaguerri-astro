@@ -2,157 +2,746 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { Image } from 'astro:assets';
-import { Animate } from 'astro-animations';
-import Tags from '../../components/Tags.astro';
+import mediaManifest from '../../data/media-manifest.json';
+import { mediaUrl } from '../../utils/media.js';
 
-const projects = (await getCollection('projects'))
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const imageExtensions = /\.(jpg|jpeg|png|webp)$/i;
 
-const projectItems = projects.map((p) => {
-  const slug = p.id.trim();
-  const images = import.meta.glob('../../content/projects/**/*.{jpg,jpeg,png,webp}', { eager: true });
-  const imgs = Object.keys(images)
-    .filter((k) => k.includes(`/projects/${slug}/`))
-    .map((k) => images[k].default);
+function getCover(collection, slug, declaredCover) {
+  const folder = `${collection}/${slug.toLowerCase()}/`;
+  const normalizedCover = declaredCover?.trim().toLowerCase();
 
-  imgs.sort((a, b) =>
-    a.src.includes('cover') ? -1 : (b.src.includes('cover') ? 1 : 0)
-  );
+  const images = mediaManifest.filter((image) => {
+    const path = image.path.toLowerCase();
 
-  const dateStr = p.data.date.toLocaleDateString('ca-ES', {
-    month: 'long',
-    year: 'numeric',
+    return path.startsWith(folder) && imageExtensions.test(path);
   });
 
+  let cover;
+
+  if (normalizedCover) {
+    cover = images.find((image) =>
+      image.path.toLowerCase().split('/').pop() === normalizedCover
+    );
+  } else {
+    cover = images.find((image) =>
+      /^cover\.(jpg|jpeg|png|webp)$/i.test(
+        image.path.split('/').pop()
+      )
+    );
+  }
+
+  if (!cover) return null;
+
   return {
-    ...p,
+    src: mediaUrl(cover.path),
+    width: cover.width,
+    height: cover.height,
+  };
+}
+
+function formatDate(date) {
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+
+  return `${month}${year}`;
+}
+
+const projects = await getCollection('projects');
+const posts = await getCollection('blog');
+
+const projectItems = projects.map((project) => {
+  const slug = project.id.trim();
+  const isGallery = project.data.type === 'gallery';
+
+  return {
+    id: `project-${slug}`,
     slug,
-    image: imgs[0],
-    dateStr: dateStr.charAt(0).toUpperCase() + dateStr.slice(1),
-    tag: 'Projecte',
-    tagClass: 'tag-projecte',
+    title: project.data.title,
+    description: project.data.description,
+    date: project.data.date ?? null,
+    type: isGallery ? 'gallery' : 'project',
+    typeLabel: isGallery ? 'Galería' : 'Proyecto',
+    href: `/proyectos/${slug}`,
+    image: getCover('projects', slug, project.data.cover),
   };
 });
 
-const posts = (await getCollection('blog'))
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-
-const postItems = posts.map((p) => {
-  const slug = p.id.trim();
-  const images = import.meta.glob('../../content/blog/**/*.{jpg,jpeg,png,webp}', { eager: true });
-  const imgs = Object.keys(images)
-    .filter((k) => k.includes(`/blog/${slug}/`))
-    .map((k) => images[k].default);
-
-  imgs.sort((a, b) =>
-    a.src.includes('cover') ? -1 : (b.src.includes('cover') ? 1 : 0)
-  );
-
-  const dateStr = p.data.date.toLocaleDateString('ca-ES', {
-    month: 'long',
-    year: 'numeric',
-  });
+const postItems = posts.map((post) => {
+  const slug = post.id.trim();
 
   return {
-    ...p,
+    id: `text-${slug}`,
     slug,
-    image: imgs[0],
-    dateStr: dateStr.charAt(0).toUpperCase() + dateStr.slice(1),
-    tag: 'Editorial',
-    tagClass: 'tag-editorial',
+    title: post.data.title,
+    description: post.data.description,
+    date: post.data.date ?? null,
+    type: 'text',
+    typeLabel: 'Editorial',
+    href: `/blog/${slug}`,
+    image: getCover('blog', slug, post.data.cover),
   };
 });
 
-const allItems = [...projectItems, ...postItems]
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const galleryItems = projectItems
+  .filter((item) => item.type === 'gallery')
+  .sort((a, b) => {
+    if (!a.date) return 1;
+    if (!b.date) return -1;
+    return b.date.valueOf() - a.date.valueOf();
+  });
+
+const allItems = [
+  ...projectItems.filter((item) => item.type !== 'gallery'),
+  ...postItems,
+];
+
+const datedItems = allItems
+  .filter((item) => item.date)
+  .sort((a, b) => {
+    const difference = b.date.valueOf() - a.date.valueOf();
+
+    if (difference !== 0) return difference;
+
+    return a.type === 'project' ? -1 : 1;
+  });
+
+const undatedItems = allItems.filter((item) => !item.date);
+
+const years = [...new Set(
+  datedItems.map((item) => item.date.getFullYear())
+)];
+
+const yearGroups = years.map((year) => ({
+  year,
+  items: datedItems.filter(
+    (item) => item.date.getFullYear() === year
+  ),
+}));
 ---
 
-<BaseLayout title="Index | Pablo Izaguerri">
-  <div class="site-container" style="padding-top: 0rem;">
-    <div class="editorial-list">
-      {allItems.map((item, index) => (
-        <Animate type="fade" direction="up" duration={800} easing="ease-out-5">
-          <a href={item.tag === 'Projecte' ? `/proyectos/${item.slug}` : `/blog/${item.slug}`} class={`editorial-item ${index % 2 !== 0 ? 'reverse' : ''}`}>
-            <div class="editorial-image">
-              {item.image && <Image src={item.image} alt={item.data.title} widths={[400, 800]} />}
-            </div>
-            <div class="editorial-text">
-              <span class={`editorial-tag ${item.tagClass}`}>{item.tag}</span>
-              <h3>{item.data.title}</h3>
-              <p class="editorial-meta">{item.dateStr}</p>
-              <Tags tags={item.data.tags} />
-              <p class="editorial-summary">{item.data.description}</p>
-            </div>
-          </a>
-        </Animate>
+<BaseLayout title="Índice | Pablo Izaguerri">
+  <div class="chronology-page">
+    <div class="chronology-heading">Archivo</div>
+
+    <div class="chronology">
+      {galleryItems.length > 0 && (
+        <section
+          class="chronology-year chronology-year-galleries"
+          id="year-galleries"
+          data-chronology-section
+          aria-labelledby="heading-galleries"
+        >
+          <div class="chronology-year-marker">
+            <a
+              class="chronology-marker-link"
+              href="#year-galleries"
+              data-chronology-link
+            >
+              <h2 id="heading-galleries">Galerías</h2>
+            </a>
+          </div>
+
+          <div class="chronology-year-content">
+            {galleryItems.map((item) => (
+              <article
+                class:list={[
+                  'chronology-item',
+                  { 'chronology-item-no-image': !item.image },
+                ]}
+              >
+                <span class="chronology-dot" aria-hidden="true"></span>
+
+                <a class="chronology-link" href={item.href}>
+                  {item.image && (
+                    <div class="chronology-image">
+                      <img
+                        src={item.image.src}
+                        alt={item.title}
+                        width={item.image.width}
+                        height={item.image.height}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </div>
+                  )}
+
+                  <div class="chronology-information">
+                    {item.date && (
+                      <div class="chronology-meta">
+                        <time datetime={item.date.toISOString()}>
+                          {formatDate(item.date)}
+                        </time>
+                      </div>
+                    )}
+
+                    <h3>{item.title}</h3>
+
+                    <span class="chronology-type chronology-type-gallery">
+                      GALERÍA
+                    </span>
+
+                    {item.description && (
+                      <p>{item.description}</p>
+                    )}
+                  </div>
+                </a>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {yearGroups.map((group) => (
+        <section
+          class="chronology-year"
+          id={`year-${group.year}`}
+          data-chronology-section
+          aria-labelledby={`heading-${group.year}`}
+        >
+          <div class="chronology-year-marker">
+            <a
+              class="chronology-marker-link"
+              href={`#year-${group.year}`}
+              data-chronology-link
+            >
+              <h2 id={`heading-${group.year}`}>{group.year}</h2>
+            </a>
+          </div>
+
+          <div class="chronology-year-content">
+            {group.items.map((item) => (
+              <article
+                class:list={[
+                  'chronology-item',
+                  { 'chronology-item-no-image': !item.image },
+                ]}
+              >
+                <span class="chronology-dot" aria-hidden="true"></span>
+
+                <a class="chronology-link" href={item.href}>
+                  {item.image && (
+                    <div class="chronology-image">
+                      <img
+                        src={item.image.src}
+                        alt={item.title}
+                        width={item.image.width}
+                        height={item.image.height}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </div>
+                  )}
+
+                  <div class="chronology-information">
+                    <div class="chronology-meta">
+                      <time datetime={item.date.toISOString()}>
+                        {formatDate(item.date)}
+                      </time>
+                    </div>
+
+                    <h3>{item.title}</h3>
+
+                    <span class={`chronology-type chronology-type-${item.type}`}>
+                      {item.typeLabel}
+                    </span>
+
+                    {item.description && (
+                      <p>{item.description}</p>
+                    )}
+                  </div>
+                </a>
+              </article>
+            ))}
+          </div>
+        </section>
       ))}
+
+      {undatedItems.length > 0 && (
+        <section
+          class="chronology-year chronology-year-undated"
+          id="year-undated"
+          data-chronology-section
+          aria-labelledby="heading-undated"
+        >
+          <div class="chronology-year-marker">
+            <a
+              class="chronology-marker-link"
+              href="#year-undated"
+              data-chronology-link
+            >
+              <h2 id="heading-undated">—</h2>
+              <span>Sin fecha</span>
+            </a>
+          </div>
+
+          <div class="chronology-year-content">
+            {undatedItems.map((item) => (
+              <article
+                class:list={[
+                  'chronology-item',
+                  { 'chronology-item-no-image': !item.image },
+                ]}
+              >
+                <span class="chronology-dot" aria-hidden="true"></span>
+
+                <a class="chronology-link" href={item.href}>
+                  {item.image && (
+                    <div class="chronology-image">
+                      <img
+                        src={item.image.src}
+                        alt={item.title}
+                        width={item.image.width}
+                        height={item.image.height}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </div>
+                  )}
+
+                  <div class="chronology-information">
+                    <h3>{item.title}</h3>
+
+                    <span class={`chronology-type chronology-type-${item.type}`}>
+                      {item.typeLabel}
+                    </span>
+
+                    {item.description && (
+                      <p>{item.description}</p>
+                    )}
+                  </div>
+                </a>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   </div>
 </BaseLayout>
 
-<style is:global>
-  .editorial-list {
+<script>
+  let cleanupChronologyNavigation;
+
+  function initChronologyNavigation() {
+    cleanupChronologyNavigation?.();
+
+    const page = document.querySelector('.chronology-page');
+
+    if (!page) return;
+
+    const links = [...page.querySelectorAll('[data-chronology-link]')];
+    const sections = [...page.querySelectorAll('[data-chronology-section]')];
+
+    if (!links.length || !sections.length) return;
+
+    const updateNavigation = () => {
+      const threshold = 120;
+      let activeIndex = 0;
+
+      sections.forEach((section, index) => {
+        if (section.getBoundingClientRect().top <= threshold) {
+          activeIndex = index;
+        }
+      });
+
+      links.forEach((link, index) => {
+        link.classList.toggle('is-past', index < activeIndex);
+        link.classList.toggle('is-current', index === activeIndex);
+        link.classList.toggle('is-future', index > activeIndex);
+
+        if (index === activeIndex) {
+          link.setAttribute('aria-current', 'location');
+        } else {
+          link.removeAttribute('aria-current');
+        }
+      });
+    };
+
+    let animationFrame = null;
+
+    const handleScroll = () => {
+      if (animationFrame !== null) return;
+
+      animationFrame = requestAnimationFrame(() => {
+        updateNavigation();
+        animationFrame = null;
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll);
+
+    links.forEach((link) => {
+      link.addEventListener('click', handleScroll);
+    });
+
+    updateNavigation();
+
+    cleanupChronologyNavigation = () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+
+      links.forEach((link) => {
+        link.removeEventListener('click', handleScroll);
+      });
+
+      if (animationFrame !== null) {
+        cancelAnimationFrame(animationFrame);
+      }
+    };
+  }
+
+  document.addEventListener('astro:page-load', initChronologyNavigation);
+
+  document.addEventListener('astro:before-swap', () => {
+    cleanupChronologyNavigation?.();
+  });
+
+  initChronologyNavigation();
+</script>
+
+<style>
+  .chronology-page {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1.5rem 4vw 6rem;
+    box-sizing: border-box;
+  }
+
+  .chronology-heading {
+    margin-bottom: 2rem;
+    color: var(--text-2);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* Eje cronológico único */
+
+  .chronology {
+    position: relative;
+    min-width: 0;
+  }
+
+  .chronology::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(150px + 3rem);
+    width: 1px;
+    background: var(--border);
+  }
+
+  .chronology-year {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr);
+    column-gap: 3rem;
+    position: relative;
+    scroll-margin-top: 6rem;
+  }
+
+  .chronology-year:not(:last-child) {
+    padding-bottom: 5rem;
+  }
+
+  .chronology-year-marker {
+    position: relative;
+    padding-top: 0.25rem;
+  }
+
+  .chronology-marker-link {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    color: var(--text-1);
+    text-decoration: none;
+    transition:
+      color 0.25s ease,
+      opacity 0.25s ease,
+      transform 0.25s ease;
+  }
+
+  .chronology-marker-link h2 {
+    margin: 0;
+    color: inherit;
+    font-size: clamp(2rem, 3vw, 3rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.06em;
+    transition:
+      font-size 0.25s ease,
+      opacity 0.25s ease;
+  }
+
+  .chronology-marker-link > span {
+    margin-top: 0.5rem;
+    color: var(--text-2);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .chronology-marker-link.is-past {
+    opacity: 0.55;
+  }
+
+  .chronology-marker-link.is-past h2 {
+    font-size: 0.85rem;
+    font-weight: 400;
+  }
+
+  .chronology-marker-link.is-current {
+    opacity: 1;
+  }
+
+  .chronology-marker-link.is-current h2 {
+    font-size: clamp(2rem, 3vw, 3rem);
+    font-weight: 700;
+  }
+
+  .chronology-marker-link.is-future {
+    opacity: 0.8;
+  }
+
+  .chronology-year-content {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 5rem;
-    margin-top: 2rem;
-    margin-bottom: 4rem;
+    gap: 4rem;
+    min-width: 0;
+    padding-left: 2.5rem;
   }
-  .editorial-item {
+
+  /* Elementos de la cronología */
+
+  .chronology-item {
+    position: relative;
+    min-width: 0;
+  }
+
+  .chronology-dot {
+    position: absolute;
+    top: 0.35rem;
+    left: calc(-2.5rem - 3px);
+    z-index: 1;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text-2);
+  }
+
+  .chronology-link {
     display: grid;
-    grid-template-columns: 350px 1fr;
-    gap: 3rem;
-    text-decoration: none;
-    color: inherit !important;
+    grid-template-columns: minmax(0, 1.5fr) minmax(220px, 1fr);
     align-items: start;
-    transition: opacity 0.3s ease;
+    gap: 2rem;
+    color: inherit;
+    text-decoration: none;
   }
-  .editorial-item.reverse {
-    grid-template-columns: 1fr 350px;
-  }
-  .editorial-item.reverse .editorial-image { order: 2; }
-  .editorial-item.reverse .editorial-text { order: 1; }
-  .editorial-item:hover { opacity: 0.8; }
-  .editorial-image { width: 100%; overflow: hidden; }
-  .editorial-image img { width: 100%; height: auto; display: block; object-fit: cover; border-radius: 0; }
-  .editorial-text { display: flex; flex-direction: column; justify-content: flex-start; }
 
-  /* Identificación del tipo de contenido */
-  .editorial-tag {
+  .chronology-image {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: var(--surface-2);
+  }
+
+  .chronology-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: filter 0.5s ease;
+  }
+
+  .chronology-link:hover .chronology-image img {
+    filter: grayscale(100%);
+  }
+
+  .chronology-information {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-top: 0.15rem;
+  }
+
+  .chronology-meta {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.85rem;
+  }
+
+  .chronology-meta time {
+    color: var(--text-2);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+  }
+
+  /* Títulos y etiquetas */
+
+  .chronology-information h3 {
+    margin: 0;
+    color: var(--text-1);
+    font-size: clamp(1.5rem, 2vw, 2rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.035em;
+  }
+
+  .chronology-type {
     display: inline-block;
-    font-size: 0.7rem;
-    font-weight: 600;
+    margin-top: 0.75rem;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid currentColor;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    letter-spacing: 0.15em;
-    margin-bottom: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    width: fit-content;
-    background-color: transparent !important;
-    border: 1px solid;
   }
 
-  .tag-projecte {
-    color: #1e3a8a !important;
-    border-color: #1e3a8a !important;
+  .chronology-type-project {
+    color: #1e3a8a;
   }
 
-  .tag-editorial {
-    color: #d97706 !important;
-    border-color: #d97706 !important;
+  .chronology-type-text {
+    color: #d97706;
   }
 
-  .editorial-text h3 { font-size: 1.3rem; font-weight: 600; margin: 0 0 0.5rem 0; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-1) !important; text-decoration: none !important; }
-  .editorial-meta { font-size: 0.9rem; color: var(--text-2) !important; margin-bottom: 0.75rem; text-decoration: none !important; }
-
-  .editorial-text .tags {
-    margin-bottom: 1rem;
+  .chronology-type-gallery {
+    color: var(--text-1);
   }
 
-  .editorial-summary { font-size: 1rem; line-height: 1.6; color: var(--text-1) !important; text-decoration: none !important; margin: 0; }
+  .chronology-information p {
+    margin: 0.85rem 0 0;
+    color: var(--text-2);
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
 
-  @media (max-width: 768px) {
-    .editorial-item, .editorial-item.reverse { grid-template-columns: 1fr; gap: 1rem; }
-    .editorial-item.reverse .editorial-image, .editorial-item.reverse .editorial-text { order: 0; }
+  /* Elementos sin imagen */
+
+  .chronology-item-no-image .chronology-link {
+    display: block;
+    max-width: 680px;
+    padding: 0.25rem 0 0.5rem;
+  }
+
+  .chronology-item-no-image .chronology-information {
+    padding-top: 0;
+  }
+
+  /* Responsive */
+
+  @media (max-width: 1000px) {
+    .chronology-year {
+      grid-template-columns: 110px minmax(0, 1fr);
+      column-gap: 2rem;
+    }
+
+    .chronology::before {
+      left: calc(110px + 2rem);
+    }
+
+    .chronology-link {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.25rem;
+    }
+
+    .chronology-information {
+      padding-top: 0;
+    }
+
+    .chronology-image {
+      aspect-ratio: 3 / 2;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .chronology-page {
+      padding: 0.75rem 1rem 4rem;
+    }
+
+    .chronology-heading {
+      margin-bottom: 1.5rem;
+    }
+
+    .chronology::before {
+      left: 0;
+    }
+
+    .chronology-year {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      padding-bottom: 3.5rem;
+    }
+
+    .chronology-year-marker {
+      padding-left: 1.5rem;
+    }
+
+    .chronology-marker-link h2 {
+      font-size: 2rem;
+    }
+
+    .chronology-marker-link.is-current h2 {
+      font-size: 2rem;
+    }
+
+    .chronology-marker-link.is-past h2 {
+      font-size: 0.85rem;
+    }
+
+    .chronology-year-content {
+      gap: 2.75rem;
+      padding-left: 1.5rem;
+    }
+
+    .chronology-dot {
+      left: calc(-1.5rem - 3px);
+    }
+
+    .chronology-link {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.9rem;
+    }
+
+    .chronology-image {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+    }
+
+    .chronology-information h3 {
+      font-size: 1.5rem;
+    }
+
+    .chronology-type {
+      padding: 0.32rem 0.5rem;
+      font-size: 0.68rem;
+    }
+
+    .chronology-information p {
+      font-size: 0.85rem;
+    }
+
+    .chronology-meta {
+      margin-bottom: 0.65rem;
+    }
+
+    .chronology-year-undated {
+      padding-bottom: 2rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chronology-image img,
+    .chronology-marker-link,
+    .chronology-marker-link h2 {
+      transition: none;
+    }
   }
 </style>

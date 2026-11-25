@@ -24,6 +24,7 @@ const { project } = Astro.props;
 const { Content } = await render(project);
 
 const slug = project.id.trim().toLowerCase();
+const isGallery = project.data.type === 'gallery';
 
 const englishSummary = project.data.summary_en?.trim();
 
@@ -43,8 +44,10 @@ const isCover = (path) => {
 };
 
 const galleryImages = projectImages
-  .filter((image) => !isCover(image.path))
-  .sort((a, b) => a.path.localeCompare(b.path))
+  .filter((image) => isGallery || !isCover(image.path))
+  .sort((a, b) =>
+    a.path.localeCompare(b.path, undefined, { numeric: true })
+  )
   .map((image) => ({
     ...image,
     url: mediaUrl(image.path),
@@ -57,16 +60,32 @@ function getMarkdownImage(props) {
     ? props.src
     : props.src?.src ?? '';
 
-  const filename = rawSrc
-    .split(/[?#]/)[0]
-    .split('/')
-    .pop();
+  const normalizedSrc = decodeURIComponent(
+    rawSrc.split(/[?#]/)[0]
+  ).replace(/\\/g, '/');
 
-  const image = projectImages.find((item) =>
-    item.path.toLowerCase().endsWith(`/${filename.toLowerCase()}`)
-  );
+  const projectPrefix = `projects/${slug}/`;
+
+  const relativeSrc = normalizedSrc
+    .replace(/^\/+/, '')
+    .replace(/^.*\/projects\//i, 'projects/');
+
+  const image = projectImages.find((item) => {
+    const normalizedPath = item.path.toLowerCase();
+    const normalizedRelativeSrc = relativeSrc.toLowerCase();
+
+    if (normalizedRelativeSrc.startsWith(projectPrefix)) {
+      return normalizedPath === normalizedRelativeSrc;
+    }
+
+    const filename = normalizedRelativeSrc.split('/').pop();
+
+    return normalizedPath.endsWith(`/${filename}`);
+  });
 
   if (!image) {
+    const filename = normalizedSrc.split('/').pop();
+
     throw new Error(
       `No se encontró en el manifiesto la imagen Markdown "${filename}" del proyecto "${slug}".`
     );
@@ -84,45 +103,20 @@ function getMarkdownImage(props) {
   title={`${project.data.title} | Pablo Izaguerri`}
   description={project.data.description}
 >
-  <div id="project-gallery-container">
-    <div
-      class="slider-container"
-      id="slider-container"
-      data-pswp-active="true"
-    >
-      <div class="slider-track" id="slider-track">
-        {sliderImages.map((img, index) => (
-          <a
-            href={img.url}
-            class="slider-item"
-            data-pswp-width={img.width}
-            data-pswp-height={img.height}
-          >
-            <img
-              src={img.url}
-              alt=""
-              width={img.width}
-              height={img.height}
-              loading={index === 0 ? 'eager' : 'lazy'}
-            />
-          </a>
-        ))}
-      </div>
-    </div>
-
-    <div
-      class="mosaic-container"
-      id="mosaic-container"
-      data-pswp-active="false"
-      style="display: none;"
-    >
+  {isGallery ? (
+    <div id="project-gallery-container">
       <div
         class="site-container"
-        style="padding-top: 2rem; padding-bottom: 2rem;"
+        style="padding-top: 0; padding-bottom: 4rem;"
       >
+        <header class="selected-header">
+          <h1>{project.data.title}</h1>
+        </header>
+
         <div
-          id="project-mosaic-gallery"
+          id="pure-project-gallery"
           class="justified-gallery"
+          data-pswp-active="true"
         >
           {galleryImages.map((img) => (
             <a
@@ -143,114 +137,177 @@ function getMarkdownImage(props) {
         </div>
       </div>
     </div>
-  </div>
-
-  <div class="content-container">
-    <article class="project-layout">
-      <aside class="project-sidebar">
-        <div class="sidebar-header">
-          <h1>{project.data.title}</h1>
-
-          <button
-            id="toggle-gallery-btn"
-            class="toggle-gallery-btn"
-            aria-label="Alternar vista"
-            aria-pressed="false"
-            title="Ver galería/mosaico"
-            type="button"
-          >
-            <svg
-              id="icon-grid"
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <rect x="3" y="3" width="7" height="7"></rect>
-              <rect x="14" y="3" width="7" height="7"></rect>
-              <rect x="14" y="14" width="7" height="7"></rect>
-              <rect x="3" y="14" width="7" height="7"></rect>
-            </svg>
-
-            <svg
-              id="icon-slider"
-              style="display: none;"
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <rect
-                x="3"
-                y="3"
-                width="18"
-                height="18"
-                rx="2"
-                ry="2"
-              ></rect>
-            </svg>
-          </button>
+  ) : (
+    <>
+      <div id="project-gallery-container">
+        <div
+          class="slider-container"
+          id="slider-container"
+          data-pswp-active="true"
+        >
+          <div class="slider-track" id="slider-track">
+            {sliderImages.map((img, index) => (
+              <a
+                href={img.url}
+                class="slider-item"
+                data-pswp-width={img.width}
+                data-pswp-height={img.height}
+              >
+                <img
+                  src={img.url}
+                  alt=""
+                  width={img.width}
+                  height={img.height}
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                />
+              </a>
+            ))}
+          </div>
         </div>
 
-        {project.data.date && (
-          <span class="project-year">
-            {project.data.date.getFullYear()}
-          </span>
-        )}
-
-        <Tags tags={project.data.tags} />
-
-        <Expos
-          cv={project.data.cv}
-          lang="ca"
-        />
-
-        {englishSummary && (
-          <Disclosure title={t('englishSummary')}>
-            <p>{englishSummary}</p>
-          </Disclosure>
-        )}
-      </aside>
-
-      <div class="project-main">
-        <p class="project-summary">
-          {project.data.description}
-        </p>
-
-        <div class="prose">
-          <Content
-            components={{
-              img: (props) => {
-                const image = getMarkdownImage(props);
-
-                return (
+        <div
+          class="mosaic-container"
+          id="mosaic-container"
+          data-pswp-active="false"
+          style="display: none;"
+        >
+          <div
+            class="site-container"
+            style="padding-top: 2rem; padding-bottom: 2rem;"
+          >
+            <div
+              id="project-mosaic-gallery"
+              class="justified-gallery"
+            >
+              {galleryImages.map((img) => (
+                <a
+                  href={img.url}
+                  class="post-gallery-item gallery-item project-mosaic-item"
+                  data-pswp-width={img.width}
+                  data-pswp-height={img.height}
+                >
                   <img
-                    src={image.src}
-                    alt={props.alt ?? ''}
-                    title={props.title}
-                    width={image.width}
-                    height={image.height}
+                    src={img.url}
+                    alt=""
+                    width={img.width}
+                    height={img.height}
                     loading="lazy"
-                    style="width: 100%; height: auto; border-radius: 0; margin: 2rem 0;"
                   />
-                );
-              },
-            }}
-          />
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
-    </article>
-  </div>
+
+      <div class="content-container">
+        <article class="project-layout">
+          <aside class="project-sidebar">
+            <div class="sidebar-header">
+              <h1>{project.data.title}</h1>
+
+              <button
+                id="toggle-gallery-btn"
+                class="toggle-gallery-btn"
+                aria-label="Alternar vista"
+                aria-pressed="false"
+                title="Ver galería/mosaico"
+                type="button"
+              >
+                <svg
+                  id="icon-grid"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="14" width="7" height="7"></rect>
+                  <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+
+                <svg
+                  id="icon-slider"
+                  style="display: none;"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect
+                    x="3"
+                    y="3"
+                    width="18"
+                    height="18"
+                    rx="2"
+                    ry="2"
+                  ></rect>
+                </svg>
+              </button>
+            </div>
+
+            {project.data.date && (
+              <span class="project-year">
+                {project.data.date.getFullYear()}
+              </span>
+            )}
+
+            <Tags tags={project.data.tags} />
+
+            <Expos
+              cv={project.data.cv}
+              lang="ca"
+            />
+
+            {englishSummary && (
+              <Disclosure title={t('englishSummary')}>
+                <p>{englishSummary}</p>
+              </Disclosure>
+            )}
+          </aside>
+
+          <div class="project-main">
+            <p class="project-summary">
+              {project.data.description}
+            </p>
+
+            <div class="prose">
+              <Content
+                components={{
+                  img: (props) => {
+                    const image = getMarkdownImage(props);
+
+                    return (
+                      <img
+                        src={image.src}
+                        alt={props.alt ?? ''}
+                        title={props.title}
+                        width={image.width}
+                        height={image.height}
+                        loading="lazy"
+                        style="width: 100%; height: auto; border-radius: 0; margin: 2rem 0;"
+                      />
+                    );
+                  },
+                }}
+              />
+            </div>
+          </div>
+        </article>
+      </div>
+    </>
+  )}
 </BaseLayout>
 
 <style>
@@ -461,6 +518,19 @@ function getMarkdownImage(props) {
   }
 
   function initProjectGallery() {
+    const pureGallery = document.getElementById('pure-project-gallery');
+
+    if (pureGallery) {
+      cleanupGallery?.();
+      cleanupGallery = initJustifiedGallery(pureGallery, {
+        itemSelector: '.gallery-item',
+        targetRowHeight: 288,
+        spacing: 8,
+        heightTolerance: 0.25,
+      });
+      return;
+    }
+
     const gallery = document.getElementById('project-mosaic-gallery');
 
     if (!gallery) return;

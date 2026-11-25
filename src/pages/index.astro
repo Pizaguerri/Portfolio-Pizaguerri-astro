@@ -2,200 +2,1027 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { Animate } from 'astro-animations';
 import mediaManifest from '../data/media-manifest.json';
-import { mediaUrl } from '../utils/media.js';
+import { getProjectsWithCovers } from '../utils/projects.js';
 
-// 1. Selected (siempre primero)
-const selectedImages = mediaManifest
-  .filter((image) => image.path.toLowerCase().startsWith('selected/'))
-  .sort((a, b) => a.path.localeCompare(b.path));
+const projectHref = (id) => `/proyectos/${encodeURIComponent(id.trim())}`;
 
-const selectedItems = selectedImages.length
-  ? [{
-      type: 'selected',
-      title: 'Senzills',
-      slug: 'selected',
-      images: selectedImages.slice(0, 5).map((image) => ({
-        ...image,
-        src: mediaUrl(image.path),
-      })),
-      tag: null,
-      tagColor: null,
-    }]
-  : [];
+const projects = getProjectsWithCovers(
+  await getCollection('projects'),
+  mediaManifest
+).filter((project) => project.image?.src);
 
-// 2. Proyectos (orden: más reciente → más antigua)
-const projects = (await getCollection('projects'))
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const first = projects[0];
 
-const projectImages = projects.map((p) => {
-  const slug = p.id.trim();
-
-  const images = mediaManifest
-    .filter((image) =>
-      image.path.toLowerCase().startsWith(`projects/${slug.toLowerCase()}/`)
-    )
-    .filter((image) => {
-      const filename = image.path.split('/').pop().toLowerCase();
-      return !/^cover\.(jpg|jpeg|png|webp)$/.test(filename);
-    })
-    .sort((a, b) => a.path.localeCompare(b.path))
-    .slice(0, 5)
-    .map((image) => ({
-      ...image,
-      src: mediaUrl(image.path),
-    }));
-
-  return {
-    type: 'project',
-    title: p.data.title,
-    slug,
-    images,
-  };
-});
-
-// 3. Blog (orden: más reciente → más antigua)
-const posts = (await getCollection('blog'))
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-
-const postImages = posts.map((p) => {
-  const slug = p.id.trim();
-
-  const images = mediaManifest
-    .filter((image) =>
-      image.path.toLowerCase().startsWith(`blog/${slug.toLowerCase()}/`)
-    )
-    .filter((image) => {
-      const filename = image.path.split('/').pop().toLowerCase();
-      return !/^cover\.(jpg|jpeg|png|webp)$/.test(filename);
-    })
-    .sort((a, b) => a.path.localeCompare(b.path))
-    .slice(0, 5)
-    .map((image) => ({
-      ...image,
-      src: mediaUrl(image.path),
-    }));
-
-  return {
-    type: 'blog',
-    title: p.data.title,
-    slug,
-    images,
-  };
-});
-
-// Unimos todo: Selected primero, luego proyectos y blog
-const allRows = [...selectedItems, ...projectImages, ...postImages];
+const desktopMedia =
+  '(min-width: 769px) and (hover: hover) and (pointer: fine)';
 ---
 
-<BaseLayout title="PABLO IZAGUERRI | Fotografía, Antropologia">
-  <div class="site-container" style="padding-top: 2rem;">
+<BaseLayout
+  title="PABLO IZAGUERRI | Fotografia, Antropologia"
+  description="Fotògraf documental i antropòleg visual. De Mallorca a Barcelona."
+>
+  {first && (
+    <link
+      rel="preload"
+      as="image"
+      href={first.image.src}
+      media={desktopMedia}
+      fetchpriority="high"
+    />
+  )}
 
-    <!-- Introducción -->
-    <header class="home-intro">
-      <p>De Mallorca a Barcelona. Fotògraf documental, antropòleg visual i una mica més.</p>
-    </header>
+  <div class="home">
+    <h1 class="visually-hidden">
+      Pablo Izaguerri, fotògraf documental i antropòleg visual
+    </h1>
 
-    <!-- Filas de fotos -->
-    <div class="home-rows">
-      {allRows.map((row, index) => {
-        const href =
-          row.type === 'project'
-            ? `/proyectos/${row.slug}`
-            : row.type === 'blog'
-              ? `/blog/${row.slug}`
-              : '/selected';
-
-        return index < 2 ? (
-          <a href={href} class="home-row">
-            <div
-              class="home-row-scroll"
-              style="display: flex; flex-direction: row; gap: 0.5rem; overflow-x: auto; width: 100%; scrollbar-width: none;"
-            >
-              {row.images.map((img, i) => (
+    {projects.length > 0 && (
+      <>
+        <section
+          class="home-desktop"
+          aria-label="Projectes"
+          data-home-desktop
+        >
+          <div class="home-slides">
+            {projects.map((project, index) => (
+              <a
+                href={projectHref(project.id)}
+                class:list={['home-slide', { 'is-active': index === 0 }]}
+                data-home-slide
+                aria-label={project.data.title}
+                aria-hidden={index === 0 ? 'false' : 'true'}
+                tabindex={index === 0 ? 0 : -1}
+              >
                 <img
-                  key={i}
-                  src={img.src}
-                  alt={row.title}
-                  width={img.width}
-                  height={img.height}
-                  loading="lazy"
-                  style="height: 340px; width: auto; flex-shrink: 0; display: block; object-fit: cover;"
+                  src={project.image.src}
+                  alt=""
+                  width={project.image.width}
+                  height={project.image.height}
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
                 />
-              ))}
-            </div>
 
-            <div
-              style="display: flex; flex-direction: column; align-items: center; margin-top: 1rem;"
-            >
-              {row.tag && (
-                <span class={`home-tag ${row.tagColor}`}>
-                  {row.tag}
-                </span>
-              )}
-              <span class="home-row-title" style="margin-top: 0.5rem;">
-                {row.title}
-              </span>
-            </div>
-          </a>
-        ) : (
-          <Animate
-            type="slide"
-            direction="up"
-            duration={1000}
-            easing="ease-out"
-          >
-            <a href={href} class="home-row">
-              <div
-                class="home-row-scroll"
-                style="display: flex; flex-direction: row; gap: 0.5rem; overflow-x: auto; width: 100%; scrollbar-width: none;"
-              >
-                {row.images.map((img, i) => (
-                  <img
-                    key={i}
-                    src={img.src}
-                    alt={row.title}
-                    width={img.width}
-                    height={img.height}
-                    loading="lazy"
-                    style="height: 340px; width: auto; flex-shrink: 0; display: block; object-fit: cover;"
-                  />
-                ))}
-              </div>
+                <span class="home-scrim" aria-hidden="true"></span>
 
-              <div
-                style="display: flex; flex-direction: column; align-items: center; margin-top: 1rem;"
-              >
-                {row.tag && (
-                  <span class={`home-tag ${row.tagColor}`}>
-                    {row.tag}
+                <span class="home-project-title" aria-hidden="true">
+                  <span class="home-project-title-text">
+                    {project.data.title}
                   </span>
-                )}
-                <span class="home-row-title" style="margin-top: 0.5rem;">
-                  {row.title}
                 </span>
-              </div>
-            </a>
-          </Animate>
-        );
-      })}
-    </div>
+              </a>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            class="home-next"
+            data-home-next
+            aria-label="Següent projecte"
+          >
+            Següent →
+          </button>
+        </section>
+
+        <section
+          class="home-mobile"
+          aria-label="Projectes"
+          data-home-mobile
+        >
+          <div class="home-mobile-slides" data-mobile-slides>
+            {projects.map((project, index) => (
+              <a
+                href={projectHref(project.id)}
+                class:list={[
+                  'home-mobile-slide',
+                  { 'is-active': index === 0 },
+                ]}
+                data-mobile-slide
+                aria-label={project.data.title}
+                aria-hidden={index === 0 ? 'false' : 'true'}
+                tabindex={index === 0 ? 0 : -1}
+              >
+                <div class="home-mobile-frame">
+                  <div class="home-mobile-image">
+                    <img
+                      src={project.image.src}
+                      alt=""
+                      width={project.image.width}
+                      height={project.image.height}
+                      loading={index === 0 ? 'eager' : 'lazy'}
+                      decoding="async"
+                    />
+                  </div>
+
+                  <div class="home-mobile-title">
+                    <h2>{project.data.title}</h2>
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+
+
+        </section>
+      </>
+    )}
   </div>
 </BaseLayout>
 
-<style is:global>
-  .home-intro {
-    text-align: center;
-    margin-bottom: 4rem;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
+<script>
+  let cleanupHome = null;
+
+  function initHome() {
+    cleanupHome?.();
+    cleanupHome = null;
+
+    const desktopHome = document.querySelector('[data-home-desktop]');
+    const mobileHome = document.querySelector('[data-home-mobile]');
+
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    let resizeObserver = null;
+    let autoAdvanceTimeout = null;
+    let mobileTransitionTimeout = null;
+
+    const reducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    );
+
+    /* =======================================================
+       ESCRITORIO
+       ======================================================= */
+
+    if (desktopHome) {
+      const slides = Array.from(
+        desktopHome.querySelectorAll('[data-home-slide]')
+      );
+      const nextButton = desktopHome.querySelector('[data-home-next]');
+
+      let activeIndex = Math.max(
+        0,
+        slides.findIndex((slide) => slide.classList.contains('is-active'))
+      );
+
+      const autoAdvanceDelay = 10000;
+
+      const header = document.getElementById('main-header');
+      const footer = document.querySelector('footer');
+
+      function measureChrome() {
+        if (header) {
+          desktopHome.style.setProperty(
+            '--home-top',
+            `${header.offsetHeight + 16}px`
+          );
+        }
+
+        if (footer) {
+          desktopHome.style.setProperty(
+            '--home-bottom',
+            `${footer.offsetHeight + 16}px`
+          );
+        }
+      }
+
+      measureChrome();
+
+      if ('ResizeObserver' in window) {
+        resizeObserver = new ResizeObserver(measureChrome);
+
+        if (header) resizeObserver.observe(header);
+        if (footer) resizeObserver.observe(footer);
+      }
+
+      function showSlide(index) {
+        const focusWasOnSlide = slides.includes(document.activeElement);
+
+        activeIndex = (index + slides.length) % slides.length;
+
+        slides.forEach((slide, slideIndex) => {
+          const isActive = slideIndex === activeIndex;
+
+          slide.classList.toggle('is-active', isActive);
+          slide.setAttribute('aria-hidden', String(!isActive));
+          slide.setAttribute('tabindex', isActive ? '0' : '-1');
+        });
+
+        if (focusWasOnSlide) {
+          slides[activeIndex].focus({ preventScroll: true });
+        }
+      }
+
+      function scheduleAutoAdvance() {
+        clearTimeout(autoAdvanceTimeout);
+        autoAdvanceTimeout = null;
+
+        if (slides.length < 2 || reducedMotion.matches) return;
+
+        autoAdvanceTimeout = window.setTimeout(() => {
+          showSlide(activeIndex + 1);
+          scheduleAutoAdvance();
+        }, autoAdvanceDelay);
+      }
+
+      function zoneAt(clientX) {
+        const rect = desktopHome.getBoundingClientRect();
+
+        if (!rect.width) return 'center';
+
+        const position = (clientX - rect.left) / rect.width;
+
+        if (position < 1 / 3) return 'left';
+        if (position > 2 / 3) return 'right';
+
+        return 'center';
+      }
+
+      desktopHome.addEventListener(
+        'mousemove',
+        (event) => {
+          const zone = zoneAt(event.clientX);
+
+          if (desktopHome.dataset.zone !== zone) {
+            desktopHome.dataset.zone = zone;
+          }
+        },
+        { signal }
+      );
+
+      desktopHome.addEventListener(
+        'mouseleave',
+        () => {
+          delete desktopHome.dataset.zone;
+        },
+        { signal }
+      );
+
+      desktopHome.addEventListener(
+        'click',
+        (event) => {
+          const target = event.target;
+
+          if (!(target instanceof Element)) return;
+          if (target.closest('[data-home-next]')) return;
+
+          const slide = target.closest('[data-home-slide]');
+
+          if (!slide || slide !== slides[activeIndex]) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          if (zoneAt(event.clientX) === 'right') {
+            showSlide(activeIndex + 1);
+            scheduleAutoAdvance();
+            return;
+          }
+
+          window.location.assign(slide.href);
+        },
+        { signal, capture: true }
+      );
+
+      nextButton?.addEventListener(
+        'click',
+        () => {
+          showSlide(activeIndex + 1);
+          scheduleAutoAdvance();
+        },
+        { signal }
+      );
+
+      document.addEventListener(
+        'keydown',
+        (event) => {
+          if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+          if (event.metaKey || event.ctrlKey || event.altKey) return;
+
+          const isFocused = desktopHome.contains(document.activeElement);
+          const isHovered = desktopHome.matches(':hover');
+
+          if (!isFocused && !isHovered) return;
+
+          event.preventDefault();
+
+          showSlide(activeIndex + (event.key === 'ArrowRight' ? 1 : -1));
+          scheduleAutoAdvance();
+        },
+        { signal }
+      );
+
+      scheduleAutoAdvance();
+      desktopHome.dataset.ready = 'true';
+    }
+
+    /* =======================================================
+       MÓVIL
+       ======================================================= */
+
+    if (mobileHome) {
+      const slides = Array.from(
+        mobileHome.querySelectorAll('[data-mobile-slide]')
+      );
+
+      const currentCounter = mobileHome.querySelector(
+        '[data-mobile-current]'
+      );
+
+      const header = document.getElementById('main-header');
+      const footer = document.querySelector('footer');
+
+      let activeIndex = Math.max(
+        0,
+        slides.findIndex((slide) => slide.classList.contains('is-active'))
+      );
+
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchStarted = false;
+      let suppressClickUntil = 0;
+
+      const swipeThreshold = 45;
+
+      function measureMobileChrome() {
+        const headerHeight = header
+          ? header.getBoundingClientRect().height
+          : 0;
+
+        const footerHeight = footer
+          ? footer.getBoundingClientRect().height
+          : 0;
+
+        mobileHome.style.setProperty(
+          '--mobile-header-space',
+          `${headerHeight}px`
+        );
+
+        mobileHome.style.setProperty(
+          '--mobile-footer-space',
+          `${footerHeight}px`
+        );
+      }
+
+      measureMobileChrome();
+
+      if ('ResizeObserver' in window) {
+        resizeObserver = new ResizeObserver(measureMobileChrome);
+
+        if (header) resizeObserver.observe(header);
+        if (footer) resizeObserver.observe(footer);
+      }
+
+      function updateCounter() {
+        if (currentCounter) {
+          currentCounter.textContent = String(activeIndex + 1).padStart(2, '0');
+        }
+      }
+
+      function clearTransitionClasses(slide) {
+        slide.classList.remove(
+          'is-entering',
+          'is-leaving',
+          'enter-from-top',
+          'enter-from-bottom',
+          'enter-from-left',
+          'enter-from-right',
+          'leave-to-top',
+          'leave-to-bottom',
+          'leave-to-left',
+          'leave-to-right'
+        );
+      }
+
+      function showMobileSlide(index, direction) {
+        if (slides.length < 2) return;
+
+        const nextIndex = (index + slides.length) % slides.length;
+
+        if (nextIndex === activeIndex) return;
+
+        clearTimeout(mobileTransitionTimeout);
+
+        const outgoingSlide = slides[activeIndex];
+        const incomingSlide = slides[nextIndex];
+
+        slides.forEach(clearTransitionClasses);
+
+        const enterClass = {
+          up: 'enter-from-bottom',
+          down: 'enter-from-top',
+          left: 'enter-from-right',
+          right: 'enter-from-left',
+        }[direction];
+
+        const leaveClass = {
+          up: 'leave-to-top',
+          down: 'leave-to-bottom',
+          left: 'leave-to-left',
+          right: 'leave-to-right',
+        }[direction];
+
+        incomingSlide.classList.add('is-active', enterClass);
+        incomingSlide.setAttribute('aria-hidden', 'false');
+        incomingSlide.setAttribute('tabindex', '0');
+
+        outgoingSlide.setAttribute('aria-hidden', 'true');
+        outgoingSlide.setAttribute('tabindex', '-1');
+
+        activeIndex = nextIndex;
+        updateCounter();
+
+        if (reducedMotion.matches) {
+          outgoingSlide.classList.remove('is-active');
+          incomingSlide.classList.remove(enterClass);
+          return;
+        }
+
+        void incomingSlide.offsetWidth;
+
+        incomingSlide.classList.add('is-entering');
+        outgoingSlide.classList.add('is-leaving', leaveClass);
+
+        requestAnimationFrame(() => {
+          incomingSlide.classList.remove(enterClass);
+        });
+
+        mobileTransitionTimeout = window.setTimeout(() => {
+          outgoingSlide.classList.remove('is-active');
+          clearTransitionClasses(outgoingSlide);
+          clearTransitionClasses(incomingSlide);
+        }, 650);
+      }
+
+      mobileHome.addEventListener(
+        'touchstart',
+        (event) => {
+          if (event.touches.length !== 1) {
+            touchStarted = false;
+            return;
+          }
+
+          touchStartX = event.touches[0].clientX;
+          touchStartY = event.touches[0].clientY;
+          touchStarted = true;
+        },
+        { passive: true, signal }
+      );
+
+      mobileHome.addEventListener(
+        'touchend',
+        (event) => {
+          if (!touchStarted || !event.changedTouches.length) return;
+
+          const touch = event.changedTouches[0];
+          const deltaX = touch.clientX - touchStartX;
+          const deltaY = touch.clientY - touchStartY;
+
+          touchStarted = false;
+
+          const absX = Math.abs(deltaX);
+          const absY = Math.abs(deltaY);
+
+          if (Math.max(absX, absY) < swipeThreshold) return;
+
+          let direction;
+
+          if (absX > absY) {
+            direction = deltaX < 0 ? 'left' : 'right';
+          } else {
+            direction = deltaY < 0 ? 'up' : 'down';
+          }
+
+          suppressClickUntil = Date.now() + 500;
+
+          if (direction === 'up' || direction === 'left') {
+            showMobileSlide(activeIndex + 1, direction);
+          } else {
+            showMobileSlide(activeIndex - 1, direction);
+          }
+        },
+        { passive: true, signal }
+      );
+
+      mobileHome.addEventListener(
+        'click',
+        (event) => {
+          if (Date.now() >= suppressClickUntil) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+        },
+        { signal, capture: true }
+      );
+
+      mobileHome.addEventListener(
+        'touchcancel',
+        () => {
+          touchStarted = false;
+        },
+        { passive: true, signal }
+      );
+
+      mobileHome.addEventListener(
+        'keydown',
+        (event) => {
+          const directions = {
+            ArrowUp: 'up',
+            ArrowDown: 'down',
+            ArrowLeft: 'left',
+            ArrowRight: 'right',
+          };
+
+          const direction = directions[event.key];
+
+          if (!direction) return;
+
+          event.preventDefault();
+
+          if (direction === 'up' || direction === 'left') {
+            showMobileSlide(activeIndex + 1, direction);
+          } else {
+            showMobileSlide(activeIndex - 1, direction);
+          }
+        },
+        { signal }
+      );
+
+      updateCounter();
+      mobileHome.dataset.ready = 'true';
+    }
+
+    cleanupHome = () => {
+      controller.abort();
+      clearTimeout(autoAdvanceTimeout);
+      clearTimeout(mobileTransitionTimeout);
+      resizeObserver?.disconnect();
+
+      desktopHome?.removeAttribute('data-ready');
+      mobileHome?.removeAttribute('data-ready');
+    };
   }
 
-  .home-intro p {
-    font-size: 1.1rem;
-    color: var(--text-2);
-    margin-bottom: 0.5rem;
+  document.addEventListener('astro:before-swap', () => {
+    cleanupHome?.();
+    cleanupHome = null;
+  });
+
+  document.addEventListener('astro:page-load', initHome);
+
+  initHome();
+</script>
+
+<style>
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .home {
+    width: 100%;
+  }
+
+  .home-mobile {
+    display: none;
+  }
+
+  /* =========================================================
+     ESCRITORIO
+     ========================================================= */
+
+  .home-desktop {
+    --home-pad: 2rem;
+    --home-title-size: 17;
+
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    min-height: 100svh;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .home-slides {
+    position: absolute;
+    inset: 0;
+  }
+
+  .home-slide {
+    position: absolute;
+    inset: 0;
+    display: block;
+    color: inherit;
+    text-decoration: none;
+    opacity: 0;
+    pointer-events: none;
+    cursor: pointer;
+    transition: opacity 350ms ease;
+  }
+
+  .home-slide.is-active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .home-slide img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: inherit;
+  }
+
+  .home-slide::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+      linear-gradient(
+        rgba(0, 0, 0, 0.45),
+        rgba(0, 0, 0, 0)
+      ) top / 100% calc(var(--home-top, 5.5rem) + 2rem) no-repeat,
+      linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.5),
+        rgba(0, 0, 0, 0)
+      ) bottom / 100% calc(var(--home-bottom, 10rem) + 3rem) no-repeat;
+  }
+
+  .home-scrim {
+    position: absolute;
+    inset: 0 auto 0 0;
+    z-index: 2;
+    width: 33.333%;
+    background: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.55) 0%,
+      rgba(0, 0, 0, 0.55) 75%,
+      rgba(0, 0, 0, 0) 100%
+    );
+    opacity: 0;
+    transition: opacity 200ms ease;
+    pointer-events: none;
+  }
+
+  .home-project-title {
+    position: absolute;
+    top: var(--home-top, 5.5rem);
+    bottom: var(--home-bottom, 10rem);
+    left: var(--home-pad);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: calc(33.333% * 0.75 - var(--home-pad));
+    container-type: inline-size;
+    opacity: 0;
+    transition: opacity 200ms ease;
+    pointer-events: none;
+  }
+
+  .home-project-title-text {
+    font-size: clamp(
+      2.25rem,
+      min(calc(var(--home-title-size) * 1cqw), 7.5svh),
+      8rem
+    );
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+    text-align: left;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+    color: #fff;
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5);
+  }
+
+  .home-desktop[data-zone='left'] .home-slide.is-active .home-scrim,
+  .home-desktop[data-zone='left'] .home-slide.is-active .home-project-title,
+  .home-slide:focus-visible .home-scrim,
+  .home-slide:focus-visible .home-project-title {
+    opacity: 1;
+  }
+
+  .home-next {
+    position: absolute;
+    right: var(--home-pad);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 4;
+    padding: 0.6rem 1rem;
+    font: inherit;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .home-next:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @media (min-width: 769px) and (hover: hover) and (pointer: fine) {
+    :global(body:has(.home-desktop)) {
+      min-height: 100svh;
+    }
+
+    :global(body:has(.home-desktop) main) {
+      padding-top: 0;
+    }
+
+    :global(body:has(.home-desktop) #main-header) {
+      position: relative;
+      z-index: 1002;
+      color: #fff;
+    }
+
+    :global(body:has(.home-desktop) footer) {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 5;
+      margin: 0;
+      padding: 0;
+      border-top: 0;
+      background: transparent;
+      color: #fff;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+      pointer-events: none;
+    }
+
+    :global(body:has(.home-desktop) footer a) {
+      color: #fff;
+      font-weight: 500;
+      text-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.9),
+        0 0 12px rgba(0, 0, 0, 0.75);
+      pointer-events: auto;
+    }
+
+    :global(body:has(.home-desktop) footer h4),
+    :global(body:has(.home-desktop) footer .footer-bottom) {
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    :global(body:has(.home-desktop) footer .site-container) {
+      padding-bottom: 1.25rem !important;
+    }
+
+    :global(body:has(.home-desktop) footer .footer-bottom) {
+      padding-top: 0.75rem;
+    }
+  }
+
+  /* =========================================================
+     MÓVIL: MARCO TIPO NEGATIVO A ANCHO COMPLETO
+     ========================================================= */
+
+  @media (max-width: 768px), (hover: none), (pointer: coarse) {
+    .home-desktop {
+      display: none;
+    }
+
+    :global(html:has(.home-mobile)),
+    :global(body:has(.home-mobile)) {
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
+
+    :global(body:has(.home-mobile) main) {
+      padding-top: 0;
+      margin: 0;
+    }
+
+    :global(body:has(.home-mobile) #main-header) {
+      position: relative;
+      z-index: 1002;
+    }
+
+    :global(body:has(.home-mobile) footer) {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 1001;
+      margin: 0;
+    }
+
+    .home-mobile {
+      --mobile-frame-color: var(--text-1);
+      --mobile-frame-text: var(--surface-1);
+
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100svh;
+      box-sizing: border-box;
+      padding:
+        var(--mobile-header-space, 5rem)
+        0
+        var(--mobile-footer-space, 5rem);
+      overflow: hidden;
+      background: var(--surface-1);
+      overscroll-behavior: none;
+    }
+
+    .home-mobile-slides {
+      position: relative;
+      flex: 1 1 auto;
+      min-height: 0;
+      width: 100%;
+      overflow: hidden;
+      isolation: isolate;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .home-mobile-slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      color: inherit;
+      text-decoration: none;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translate3d(0, 0, 0);
+      transition:
+        transform 550ms cubic-bezier(0.22, 0.61, 0.36, 1),
+        opacity 450ms ease,
+        visibility 550ms;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .home-mobile-slide.is-active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      z-index: 2;
+    }
+
+    .home-mobile-slide.is-entering {
+      opacity: 1;
+      visibility: visible;
+      z-index: 3;
+    }
+
+    .home-mobile-slide.enter-from-bottom {
+      transform: translate3d(0, 100%, 0);
+    }
+
+    .home-mobile-slide.enter-from-top {
+      transform: translate3d(0, -100%, 0);
+    }
+
+    .home-mobile-slide.enter-from-left {
+      transform: translate3d(-100%, 0, 0);
+    }
+
+    .home-mobile-slide.enter-from-right {
+      transform: translate3d(100%, 0, 0);
+    }
+
+    .home-mobile-slide.is-leaving {
+      opacity: 0;
+      z-index: 1;
+    }
+
+    .home-mobile-slide.leave-to-top {
+      transform: translate3d(0, -12%, 0);
+    }
+
+    .home-mobile-slide.leave-to-bottom {
+      transform: translate3d(0, 12%, 0);
+    }
+
+    .home-mobile-slide.leave-to-left {
+      transform: translate3d(-12%, 0, 0);
+    }
+
+    .home-mobile-slide.leave-to-right {
+      transform: translate3d(12%, 0, 0);
+    }
+
+    .home-mobile-frame {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-height: 100%;
+      padding: 0.3rem 0.3rem 0;
+      box-sizing: border-box;
+      overflow: hidden;
+      background: var(--mobile-frame-color);
+      color: var(--mobile-frame-text);
+    }
+
+    .home-mobile-image {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 1 auto;
+      min-height: 0;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .home-mobile-image img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: calc(
+        100svh
+        - var(--mobile-header-space, 5rem)
+        - var(--mobile-footer-space, 5rem)
+        - 8rem
+      );
+      object-fit: contain;
+      object-position: center;
+    }
+
+    .home-mobile-title {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      flex: 0 0 auto;
+      min-height: 3.1rem;
+      padding: 0.55rem 0.3rem 0.65rem;
+    }
+
+    .home-mobile-title h2 {
+      margin: 0;
+      max-width: 100%;
+      font-size: 0.85rem;
+      line-height: 1.2;
+      font-weight: 400;
+      text-align: right;
+      overflow-wrap: anywhere;
+    }
+
+    .home-mobile-counter {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.4rem;
+      flex: 0 0 auto;
+      min-height: 2.5rem;
+      padding: 0.25rem 0;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      color: var(--text-2);
+      opacity: 0.7;
+    }
+
+    .home-mobile-counter-separator {
+      opacity: 0.5;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .home-slide,
+    .home-scrim,
+    .home-project-title,
+    .home-mobile-slide {
+      transition: none;
+    }
+
+    .home-mobile-slide.is-entering,
+    .home-mobile-slide.is-leaving,
+    .home-mobile-slide.enter-from-top,
+    .home-mobile-slide.enter-from-bottom,
+    .home-mobile-slide.enter-from-left,
+    .home-mobile-slide.enter-from-right,
+    .home-mobile-slide.leave-to-top,
+    .home-mobile-slide.leave-to-bottom,
+    .home-mobile-slide.leave-to-left,
+    .home-mobile-slide.leave-to-right {
+      transform: none;
+    }
   }
 </style>

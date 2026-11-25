@@ -1,0 +1,264 @@
+
+---
+import { useTranslations } from '../i18n/utils';
+
+export interface Props {
+  lang?: string;
+}
+
+const { lang = 'ca' } = Astro.props;
+const t = useTranslations(lang);
+
+const isAboutPage = Astro.url.pathname.startsWith('/about');
+const isHomePage = Astro.url.pathname === '/';
+---
+
+<footer class:list={['site-footer', { 'home-footer': isHomePage }]}>
+  <div class="site-container footer-container">
+
+    {!isHomePage && isAboutPage && (
+      <div class="footer-languages-row">
+        <nav class="footer-group footer-languages" aria-label={t('footer.lang')}>
+          <!-- <span class="footer-label">{t('footer.lang')}</span> -->
+          <ul class="footer-links language-switcher" id="language-switcher">
+            <li>
+              <a href="/about" data-lang="ca" class={lang === 'ca' ? 'active' : ''}>CA</a>
+            </li>
+            <li>
+              <a href="/about/es" data-lang="es" class={lang === 'es' ? 'active' : ''}>ES</a>
+            </li>
+            <li>
+              <a href="/about/en" data-lang="en" class={lang === 'en' ? 'active' : ''}>EN</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    )}
+
+    <div class="footer-content">
+
+      {!isHomePage && (
+        <nav class="footer-group footer-index" aria-label={t('footer.index')}>
+          <!-- <span class="footer-label">{t('footer.index')}</span> -->
+          <ul class="footer-links">
+            <li><a href="/indice">{t('nav.home')}</a></li>
+            <li><a href="/proyectos/Senzills">Selecció</a></li>
+            <li><a href="/proyectos">Treballs</a></li>
+            <li><a href="/blog">Textos</a></li>
+            <li><a href="/about">{t('nav.about.footer')}</a></li>
+          </ul>
+        </nav>
+      )}
+
+      <nav class="footer-group footer-contact" aria-label="Contacte">
+        <!-- <span class="footer-label">CONTACTE</span> -->
+        <ul class="footer-links">
+          <li>
+            <a href="mailto:hola@pabloizaguerri.org">hola@pabloizaguerri.org</a>
+          </li>
+        </ul>
+      </nav>
+
+      {!isHomePage && (
+        <nav class="footer-group footer-social" aria-label="Xarxes">
+          <!-- <span class="footer-label">XARXES</span> -->
+          <ul class="footer-links">
+            <li>
+              <a href="https://instagram.com/pizaguerri" target="_blank" rel="noopener noreferrer">Instagram</a>
+            </li>
+            <li>
+              <a href="https://mastodon.social/@Pizzaguerri" target="_blank" rel="noopener noreferrer">Mastodon</a>
+            </li>
+            <li>
+              <a href="https://video.anartist.org/c/pizzaguerri_/videos" target="_blank" rel="noopener noreferrer">Anartist</a>
+            </li>
+            <li>
+              <a href="https://codeberg.org/Pizaguerri" target="_blank" rel="noopener noreferrer">Codeberg</a>
+            </li>
+            <li>
+              <a href="https://www.last.fm/user/P91870" target="_blank" rel="noopener noreferrer">Last.fm</a>
+            </li>
+          </ul>
+        </nav>
+      )}
+
+    </div>
+
+    {!isHomePage && (
+      <div class="footer-bottom">
+        <p>&copy; {new Date().getFullYear()} {t('copyrightNotice')}</p>
+      </div>
+    )}
+  </div>
+</footer>
+
+<style>
+
+.site-footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+}
+
+.footer-container {
+  padding-bottom: 2rem;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: 1.5rem;
+  width: 100%;
+}
+
+.footer-index {
+  grid-column: 1;
+  justify-self: start;
+}
+
+.footer-contact {
+  grid-column: 2;
+  justify-self: center;
+}
+
+.footer-social {
+  grid-column: 3;
+  justify-self: end;
+  min-width: 0;
+}
+
+.footer-social .footer-links {
+  justify-content: flex-end;
+}
+
+.home-footer .footer-content {
+  display: flex;
+  justify-content: center;
+}
+
+.footer-languages-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.footer-languages {
+  grid-column: 2;
+  justify-self: center;
+}
+
+.footer-group {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.footer-label {
+  flex: 0 0 auto;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.footer-links {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin: 0;
+  padding: 0;
+}
+
+.footer-links a {
+  color: var(--text-2);
+  font-size: 0.85rem;
+  font-weight: 400;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.language-switcher a.active {
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.footer-bottom {
+  padding-top: 1.5rem;
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+
+.footer-bottom p {
+  margin: 0;
+}
+
+@media (min-width: 769px) {
+  .footer-content {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  .footer-social {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .footer-index,
+  .footer-contact,
+  .footer-social {
+    width: 100%;
+    justify-self: auto;
+  }
+
+  .footer-index .footer-links,
+  .footer-contact .footer-links,
+  .footer-social .footer-links {
+    justify-content: flex-start;
+  }
+
+  .footer-languages-row {
+    grid-template-columns: 1fr;
+    margin-bottom: 1.5rem;
+  }
+
+  .footer-languages {
+    grid-column: 1;
+    justify-self: center;
+  }
+
+  .footer-group {
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+
+  .footer-links {
+    justify-content: flex-start;
+    gap: 0.5rem 1.2rem;
+  }
+}
+</style>

@@ -260,7 +260,7 @@ echo " GENERANDO MANIFIESTO DE IMÁGENES"
 echo "============================================================"
 echo ""
 
-node "$MANIFEST_SCRIPT"
+npm run generate:media
 
 echo ""
 

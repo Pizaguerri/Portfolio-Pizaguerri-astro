@@ -1,3 +1,4 @@
+
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
@@ -13,6 +14,8 @@ const portfolioSchema = z.object({
   title: z.string(),
   description: z.string().optional(),
   date: z.coerce.date().optional(),
+  type: z.enum(['project', 'gallery']).default('project'),
+  cover: z.string().optional(),
   tags: z.array(z.string()).optional().default([]),
   summary_en: z.string().optional(),
   draft: z.boolean().optional().default(false),
@@ -49,17 +52,6 @@ const blog = defineCollection({
   schema: portfolioWithCvSchema,
 });
 
-// Selected
-const selected = defineCollection({
-  loader: glob({
-    pattern: '**/*.md',
-    base: './src/content/selected',
-    generateId: ({ entry }) =>
-      entry.replace(/\/index\.([a-z]{2})\.md$/, '.$1'),
-  }),
-  schema: portfolioSchema,
-});
-
 // About y CV manual
 const about = defineCollection({
   loader: glob({
@@ -79,6 +71,5 @@ const about = defineCollection({
 export const collections = {
   projects,
   blog,
-  selected,
   about,
 };

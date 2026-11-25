@@ -50,16 +50,6 @@
     "height": 1067
   },
   {
-    "path": "blog/The Anxiety of Running Away From a Violent Storm/theanxietyofrunningawayfromaviolentstorm-10.jpg",
-    "width": 1600,
-    "height": 1067
-  },
-  {
-    "path": "blog/The Anxiety of Running Away From a Violent Storm/theanxietyofrunningawayfromaviolentstorm-11.jpg",
-    "width": 1600,
-    "height": 1067
-  },
-  {
     "path": "blog/The Anxiety of Running Away From a Violent Storm/theanxietyofrunningawayfromaviolentstorm-2.jpg",
     "width": 1600,
     "height": 1067
@@ -100,7 +90,57 @@
     "height": 1067
   },
   {
+    "path": "blog/The Anxiety of Running Away From a Violent Storm/theanxietyofrunningawayfromaviolentstorm-10.jpg",
+    "width": 1600,
+    "height": 1067
+  },
+  {
+    "path": "blog/The Anxiety of Running Away From a Violent Storm/theanxietyofrunningawayfromaviolentstorm-11.jpg",
+    "width": 1600,
+    "height": 1067
+  },
+  {
     "path": "projects/BarcelonaExperience/barcelonaexperience-1.jpg",
+    "width": 3780,
+    "height": 2520
+  },
+  {
+    "path": "projects/BarcelonaExperience/barcelonaexperience-2.jpg",
+    "width": 3780,
+    "height": 2520
+  },
+  {
+    "path": "projects/BarcelonaExperience/barcelonaexperience-3.jpg",
+    "width": 3780,
+    "height": 2520
+  },
+  {
+    "path": "projects/BarcelonaExperience/barcelonaexperience-4.jpg",
+    "width": 3780,
+    "height": 2520
+  },
+  {
+    "path": "projects/BarcelonaExperience/barcelonaexperience-5.jpg",
+    "width": 3780,
+    "height": 2520
+  },
+  {
+    "path": "projects/BarcelonaExperience/barcelonaexperience-6.jpg",
+    "width": 3780,
+    "height": 2520
+  },
+  {
+    "path": "projects/BarcelonaExperience/barcelonaexperience-7.jpg",
+    "width": 3780,
+    "height": 2520
+  },
+  {
+    "path": "projects/BarcelonaExperience/barcelonaexperience-8.jpg",
+    "width": 3780,
+    "height": 2520
+  },
+  {
+    "path": "projects/BarcelonaExperience/barcelonaexperience-9.jpg",
     "width": 3780,
     "height": 2520
   },
@@ -150,46 +190,6 @@
     "height": 2520
   },
   {
-    "path": "projects/BarcelonaExperience/barcelonaexperience-2.jpg",
-    "width": 3780,
-    "height": 2520
-  },
-  {
-    "path": "projects/BarcelonaExperience/barcelonaexperience-3.jpg",
-    "width": 3780,
-    "height": 2520
-  },
-  {
-    "path": "projects/BarcelonaExperience/barcelonaexperience-4.jpg",
-    "width": 3780,
-    "height": 2520
-  },
-  {
-    "path": "projects/BarcelonaExperience/barcelonaexperience-5.jpg",
-    "width": 3780,
-    "height": 2520
-  },
-  {
-    "path": "projects/BarcelonaExperience/barcelonaexperience-6.jpg",
-    "width": 3780,
-    "height": 2520
-  },
-  {
-    "path": "projects/BarcelonaExperience/barcelonaexperience-7.jpg",
-    "width": 3780,
-    "height": 2520
-  },
-  {
-    "path": "projects/BarcelonaExperience/barcelonaexperience-8.jpg",
-    "width": 3780,
-    "height": 2520
-  },
-  {
-    "path": "projects/BarcelonaExperience/barcelonaexperience-9.jpg",
-    "width": 3780,
-    "height": 2520
-  },
-  {
     "path": "projects/BarcelonaExperience/cover.jpg",
     "width": 3780,
     "height": 2520
@@ -201,6 +201,46 @@
   },
   {
     "path": "projects/Poblenou-19/poblenou19-1.jpg",
+    "width": 1600,
+    "height": 1068
+  },
+  {
+    "path": "projects/Poblenou-19/poblenou19-2.jpg",
+    "width": 1600,
+    "height": 1067
+  },
+  {
+    "path": "projects/Poblenou-19/poblenou19-3.jpg",
+    "width": 1600,
+    "height": 1068
+  },
+  {
+    "path": "projects/Poblenou-19/poblenou19-4.jpg",
+    "width": 1600,
+    "height": 1067
+  },
+  {
+    "path": "projects/Poblenou-19/poblenou19-5.jpg",
+    "width": 1600,
+    "height": 1067
+  },
+  {
+    "path": "projects/Poblenou-19/poblenou19-6.jpg",
+    "width": 1600,
+    "height": 1068
+  },
+  {
+    "path": "projects/Poblenou-19/poblenou19-7.jpg",
+    "width": 1600,
+    "height": 1068
+  },
+  {
+    "path": "projects/Poblenou-19/poblenou19-8.jpg",
+    "width": 1600,
+    "height": 1068
+  },
+  {
+    "path": "projects/Poblenou-19/poblenou19-9.jpg",
     "width": 1600,
     "height": 1068
   },
@@ -250,77 +290,37 @@
     "height": 1068
   },
   {
-    "path": "projects/Poblenou-19/poblenou19-2.jpg",
-    "width": 1600,
-    "height": 1067
-  },
-  {
-    "path": "projects/Poblenou-19/poblenou19-3.jpg",
-    "width": 1600,
-    "height": 1068
-  },
-  {
-    "path": "projects/Poblenou-19/poblenou19-4.jpg",
-    "width": 1600,
-    "height": 1067
-  },
-  {
-    "path": "projects/Poblenou-19/poblenou19-5.jpg",
-    "width": 1600,
-    "height": 1067
-  },
-  {
-    "path": "projects/Poblenou-19/poblenou19-6.jpg",
-    "width": 1600,
-    "height": 1068
-  },
-  {
-    "path": "projects/Poblenou-19/poblenou19-7.jpg",
-    "width": 1600,
-    "height": 1068
-  },
-  {
-    "path": "projects/Poblenou-19/poblenou19-8.jpg",
-    "width": 1600,
-    "height": 1068
-  },
-  {
-    "path": "projects/Poblenou-19/poblenou19-9.jpg",
-    "width": 1600,
-    "height": 1068
-  },
-  {
-    "path": "selected/selected-1.jpg",
+    "path": "projects/Senzills/selected-1.jpg",
     "width": 1920,
     "height": 1282
   },
   {
-    "path": "selected/selected-2.jpg",
+    "path": "projects/Senzills/selected-2.jpg",
     "width": 1920,
     "height": 1280
   },
   {
-    "path": "selected/selected-3.jpg",
+    "path": "projects/Senzills/selected-3.jpg",
     "width": 1920,
     "height": 1280
   },
   {
-    "path": "selected/selected-4.jpg",
+    "path": "projects/Senzills/selected-4.jpg",
     "width": 1920,
     "height": 1280
   },
   {
-    "path": "selected/selected-5.jpg",
+    "path": "projects/Senzills/selected-5.jpg",
     "width": 1920,
     "height": 1280
   },
   {
-    "path": "selected/selected-6.jpg",
+    "path": "projects/Senzills/selected-6.jpg",
     "width": 1920,
     "height": 1280
   },
   {
-    "path": "selected/selected-7.jpg",
+    "path": "projects/Senzills/selected-7.jpg",
     "width": 1920,
     "height": 1290
   }

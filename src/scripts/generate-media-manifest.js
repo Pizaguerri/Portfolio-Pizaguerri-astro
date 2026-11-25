@@ -67,7 +67,9 @@ async function collectImages(directory) {
 async function main() {
   const images = await collectImages(CONTENT_DIR);
 
-  images.sort((a, b) => a.path.localeCompare(b.path));
+  images.sort((a, b) =>
+    a.path.localeCompare(b.path, undefined, { numeric: true })
+  );
 
   await mkdir(resolve('src/data'), { recursive: true });
 

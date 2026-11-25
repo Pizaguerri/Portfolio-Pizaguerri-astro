@@ -1,3 +1,4 @@
+
 {
   "name": "pabloizaguerri-portfolio",
   "type": "module",
@@ -8,10 +9,10 @@
   "scripts": {
     "predev": "node src/scripts/generate-media-manifest.js",
     "dev": "astro dev",
-    "prebuild": "node src/scripts/generate-media-manifest.js",
     "build": "astro build",
     "preview": "astro preview",
     "deploy": "npm run build && wrangler deploy",
+    "generate:media": "node src/scripts/generate-media-manifest.js",
     "astro": "astro"
   },
   "dependencies": {
