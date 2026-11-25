@@ -21,6 +21,7 @@ El turismo supone una actividad **pasiva disfrazada de experiencia** con el indi
 
 ![](barcelonaexperience-2.jpg)
 
+https://media.pabloizaguerri.org/projects/BarcelonaExperience/barcelonaexperience-2.jpg
 
 ## Barcelona como marca global
 
