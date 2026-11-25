@@ -16,8 +16,8 @@ if (!bioAfterEntry) {
   throw new Error("No s'ha trobat el fitxer index-after.ca.md");
 }
 
-const { Content: bioContent } = await render(bioEntry);
-const { Content: bioAfterContent } = await render(bioAfterEntry);
+const { Content: BioContent } = await render(bioEntry);
+const { Content: BioAfterContent } = await render(bioAfterEntry);
 
 // Recuperar el CV manual
 const manualCVEntry = await getEntry('bio', 'cv.ca');
@@ -43,7 +43,7 @@ const fullCV = buildCV(allEntries, manualCV);
     style="padding-top: 4rem; padding-bottom: 4rem;"
   >
     <div class="prose">
-      <bioContent
+      <BioContent
         components={{
           img: AboutImage,
         }}
@@ -67,7 +67,7 @@ const fullCV = buildCV(allEntries, manualCV);
         />
       </div>
 
-      <bioAfterContent
+      <BioAfterContent
         components={{
           img: AboutImage,
         }}

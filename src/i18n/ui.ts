@@ -1,7 +1,6 @@
-
 export const ui = {
   ca: {
-    'nav.index': 'INDEX',
+    'nav.index': 'ARXIU',
     'nav.about': 'BIO',
     'menu': 'Menú',
     'home': 'Inici',
@@ -20,7 +19,7 @@ export const ui = {
     'nav.projects': 'Projectes',
     'nav.blog': 'Editorial',
     'nav.about.footer': 'Bio',
-    'nav.home': 'Índex',
+    'nav.home': 'Arxiu',
     'gallery': 'Galeria',
     'expos': 'Mostres',
     'cv.exhibitions': 'EXPOSICIONS',
@@ -39,9 +38,18 @@ La fotografia que m'interessa és:
 - 
 Moltes gràcies.
 Atentament,`,
+
+    // Arxiu
+    'archive.title': 'ARXIU',
+    'archive.galleries': 'COL·LECCIONS',
+    'archive.gallery': 'GALERIA',
+    'archive.project': 'PROJECTE',
+    'archive.editorial': 'EDITORIAL',
+    'archive.undated': 'SENSE DATA',
   },
+
   es: {
-    'nav.index': 'INDEX',
+    'nav.index': 'ARCHIVO',
     'nav.about': 'BIO',
     'menu': 'Menú',
     'home': 'Inicio',
@@ -60,7 +68,7 @@ Atentament,`,
     'nav.projects': 'Proyectos',
     'nav.blog': 'Editorial',
     'nav.about.footer': 'Bio',
-    'nav.home': 'Índice',
+    'nav.home': 'Archivo',
     'gallery': 'Galería',
     'expos': 'Exposiciones',
     'cv.exhibitions': 'EXPOSICIONES',
@@ -79,9 +87,18 @@ La fotografía que me interesa es:
 - 
 Muchas gracias.
 Un saludo,`,
+
+    // Archivo
+    'archive.title': 'ARCHIVO',
+    'archive.galleries': 'COLECCIONES',
+    'archive.gallery': 'GALERÍA',
+    'archive.project': 'PROYECTO',
+    'archive.editorial': 'EDITORIAL',
+    'archive.undated': 'SIN FECHA',
   },
+
   en: {
-    'nav.index': 'INDEX',
+    'nav.index': 'ARCHIVE',
     'nav.about': 'BIO',
     'menu': 'Menu',
     'home': 'Home',
@@ -100,7 +117,7 @@ Un saludo,`,
     'nav.projects': 'Projects',
     'nav.blog': 'Editorial',
     'nav.about.footer': 'Bio',
-    'nav.home': 'Index',
+    'nav.home': 'Archive',
     'gallery': 'Gallery',
     'expos': 'Exhibitions',
     'cv.exhibitions': 'EXHIBITIONS',
@@ -119,5 +136,13 @@ The photograph I'm interested in is:
 - 
 Thank you very much.
 Best,`,
+
+    // Archive
+    'archive.title': 'ARCHIVE',
+    'archive.galleries': 'COLLECTIONS',
+    'archive.gallery': 'GALLERY',
+    'archive.project': 'PROJECT',
+    'archive.editorial': 'EDITORIAL',
+    'archive.undated': 'UNDATED',
   },
 } as const;

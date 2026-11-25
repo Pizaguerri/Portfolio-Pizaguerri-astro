@@ -3,6 +3,9 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import mediaManifest from '../../data/media-manifest.json';
 import { mediaUrl } from '../../utils/media.js';
+import { useTranslations } from '../../i18n/utils';
+
+const t = useTranslations('ca');
 
 const imageExtensions = /\.(jpg|jpeg|png|webp)$/i;
 
@@ -60,7 +63,7 @@ const projectItems = projects.map((project) => {
     description: project.data.description,
     date: project.data.date ?? null,
     type: isGallery ? 'gallery' : 'project',
-    typeLabel: isGallery ? 'Galería' : 'Proyecto',
+    typeLabel: isGallery ? t('archive.gallery') : t('archive.project'),
     href: `/work/${slug}`,
     image: getCover('work', slug, project.data.cover),
   };
@@ -76,7 +79,7 @@ const postItems = posts.map((post) => {
     description: post.data.description,
     date: post.data.date ?? null,
     type: 'text',
-    typeLabel: 'Editorial',
+    typeLabel: t('archive.editorial'),
     href: `/text/${slug}`,
     image: getCover('text', slug, post.data.cover),
   };
@@ -119,78 +122,65 @@ const yearGroups = years.map((year) => ({
 }));
 ---
 
-<BaseLayout title="Índice | Pablo Izaguerri">
+<BaseLayout title={`${t('archive.title')} | Pablo Izaguerri`}>
   <div class="chronology-page">
-    <div class="chronology-heading">Archivo</div>
+    <h1 class="chronology-heading">{t('archive.title')}</h1>
 
-    <div class="chronology">
-      {galleryItems.length > 0 && (
-        <section
-          class="chronology-year chronology-year-galleries"
-          id="year-galleries"
-          data-chronology-section
-          aria-labelledby="heading-galleries"
-        >
-          <div class="chronology-year-marker">
-            <a
-              class="chronology-marker-link"
-              href="#year-galleries"
-              data-chronology-link
+    {galleryItems.length > 0 && (
+      <section class="collections-section" aria-labelledby="heading-collections">
+        <div class="collections-marker">
+          <h2 id="heading-collections">{t('archive.galleries')}</h2>
+        </div>
+
+        <div class="collections-content">
+          {galleryItems.map((item) => (
+            <article
+              class:list={[
+                'chronology-item',
+                { 'chronology-item-no-image': !item.image },
+              ]}
             >
-              <h2 id="heading-galleries">Galerías</h2>
-            </a>
-          </div>
+              <a class="chronology-link" href={item.href}>
+                {item.image && (
+                  <div class="chronology-image">
+                    <img
+                      src={item.image.src}
+                      alt={item.title}
+                      width={item.image.width}
+                      height={item.image.height}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                )}
 
-          <div class="chronology-year-content">
-            {galleryItems.map((item) => (
-              <article
-                class:list={[
-                  'chronology-item',
-                  { 'chronology-item-no-image': !item.image },
-                ]}
-              >
-                <span class="chronology-dot" aria-hidden="true"></span>
-
-                <a class="chronology-link" href={item.href}>
-                  {item.image && (
-                    <div class="chronology-image">
-                      <img
-                        src={item.image.src}
-                        alt={item.title}
-                        width={item.image.width}
-                        height={item.image.height}
-                        loading="lazy"
-                        decoding="async"
-                      />
+                <div class="chronology-information">
+                  {item.date && (
+                    <div class="chronology-meta">
+                      <time datetime={item.date.toISOString()}>
+                        {formatDate(item.date)}
+                      </time>
                     </div>
                   )}
 
-                  <div class="chronology-information">
-                    {item.date && (
-                      <div class="chronology-meta">
-                        <time datetime={item.date.toISOString()}>
-                          {formatDate(item.date)}
-                        </time>
-                      </div>
-                    )}
+                  <h3>{item.title}</h3>
 
-                    <h3>{item.title}</h3>
+                  <span class="chronology-type chronology-type-gallery">
+                    {t('archive.gallery')}
+                  </span>
 
-                    <span class="chronology-type chronology-type-gallery">
-                      GALERÍA
-                    </span>
+                  {item.description && (
+                    <p>{item.description}</p>
+                  )}
+                </div>
+              </a>
+            </article>
+          ))}
+        </div>
+      </section>
+    )}
 
-                    {item.description && (
-                      <p>{item.description}</p>
-                    )}
-                  </div>
-                </a>
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
-
+    <div class="chronology">
       {yearGroups.map((group) => (
         <section
           class="chronology-year"
@@ -270,7 +260,7 @@ const yearGroups = years.map((year) => ({
               data-chronology-link
             >
               <h2 id="heading-undated">—</h2>
-              <span>Sin fecha</span>
+              <span>{t('archive.undated')}</span>
             </a>
           </div>
 
@@ -412,10 +402,42 @@ const yearGroups = years.map((year) => ({
   .chronology-heading {
     margin-bottom: 2rem;
     color: var(--text-2);
-    font-size: 0.7rem;
+    font-size: 1.5rem;
     font-weight: 700;
     letter-spacing: 0.15em;
     text-transform: uppercase;
+  }
+
+  /* Colecciones: sección independiente de la cronología */
+
+  .collections-section {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr);
+    column-gap: 3rem;
+    margin-bottom: 6rem;
+  }
+
+  .collections-marker {
+    grid-column: 1 / -1;
+    margin-bottom: 2rem;
+  }
+
+  .collections-marker h2 {
+    margin: 0;
+    color: var(--text-1);
+    font-size: clamp(2rem, 3vw, 3rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.06em;
+  }
+
+  .collections-content {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 4rem;
+    min-width: 0;
+    padding-left: 2.5rem;
   }
 
   /* Eje cronológico único */
@@ -637,6 +659,11 @@ const yearGroups = years.map((year) => ({
   /* Responsive */
 
   @media (max-width: 1000px) {
+    .collections-section {
+      grid-template-columns: 110px minmax(0, 1fr);
+      column-gap: 2rem;
+    }
+
     .chronology-year {
       grid-template-columns: 110px minmax(0, 1fr);
       column-gap: 2rem;
@@ -667,6 +694,28 @@ const yearGroups = years.map((year) => ({
 
     .chronology-heading {
       margin-bottom: 1.5rem;
+      padding-left: 1.5rem;
+    }
+
+    .collections-section {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-bottom: 4rem;
+    }
+
+    .collections-marker {
+      margin-bottom: 0;
+      padding-left: 1.5rem;
+    }
+
+    .collections-marker h2 {
+      font-size: 2rem;
+    }
+
+    .collections-content {
+      grid-column: 1;
+      gap: 2.75rem;
+      padding-left: 1.5rem;
     }
 
     .chronology::before {

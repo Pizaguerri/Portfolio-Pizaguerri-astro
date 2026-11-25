@@ -10,7 +10,7 @@ let lightbox = null;
 let isNavigating = false;
 
 const gallerySelector =
-  "#project-gallery-container, #post-gallery";
+  "#work-gallery-container, #project-gallery-container, #post-gallery";
 
 // En proyectos solo se incluyen las imágenes
 // pertenecientes a la vista activa.
@@ -71,6 +71,7 @@ function initLightbox() {
   if (!gallery) return;
 
   const isProjectGallery =
+    gallery.id === "work-gallery-container" ||
     gallery.id === "project-gallery-container";
 
   const imageSelector = isProjectGallery
