@@ -1,5 +1,5 @@
 ---
-title: "Sobre jo"
+title: "Bio"
 type: "page"
 layout: "single"
 ---
