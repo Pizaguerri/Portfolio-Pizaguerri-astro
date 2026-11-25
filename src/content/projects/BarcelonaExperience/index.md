@@ -1,19 +1,17 @@
 ---
 title: "Barcelona Experience"
-description: "Etnografía visual del turismo en Barcelona"
+description: "Etnografía visual de la experiencia turística en Barcelona"
 date: 2023-07-18
 tags:
   - Antropologia Visual
   - Fotografia
 cv:
   exposicions:
-    - "Escola Lliure Date Cuenta, Ca l’Isidret, 2023"
-  llibres: []
+    - "2023, Curs de Fotoperiodisme i Fotografia Documental, Escuela Libre Date Cuenta, Barcelona, Col·lectiva"
   premis: []
-  col·laboracions: []
+  publicacions_i_col·laboracions: []
 draft: false
-summary_en: >-
-  English summary of the project, written manually.
+summary_en: The Barcelona Experience consists on staying for a few days in a touristified city, trying to find the best spots to photograph, eat or visit. Tourists find themselves under the illusion of living a culturally rich experience, which in reality means paying for the most expensive fares and tickets their wallets can afford. 
 ---
 
 
@@ -23,7 +21,6 @@ El turismo supone una actividad **pasiva disfrazada de experiencia** con el indi
 
 ![](barcelonaexperience-2.jpg)
 
-https://media.pabloizaguerri.org/projects/BarcelonaExperience/barcelonaexperience-2.jpg
 
 ## Barcelona como marca global
 
@@ -48,5 +45,3 @@ En esta situación, la experiencia **Barcelona** mantiene al residente (y lo exp
 ![](barcelonaexperience-10.jpg)
 
 En un contexto de crisis climática, social, económica y cultural, la deriva neoliberal de la marca Barcelona la está convirtiendo en una **ciudad para ciertos privilegiados**, un museo al aire libre para su uso y disfrute, incapaz de reconocer que son quienes pagan todo el “cartón piedra” de este enorme decorado. La **Barcelona Experience** es, pues, una mentira que, a base de tarjeta de crédito, se apropia del patrimonio, la cultura y las calles de todos y todas las residentes, e incluso de nuestras casas.
-
-> **Trabajo final de Fotografía Documental, Escuela Date Cuenta.**

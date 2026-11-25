@@ -1,5 +1,5 @@
 ---
 title: "Senzills"
 type: "gallery"
-cover: "selected-1.jpg"
+cover: "selected-5.jpg"
 ---

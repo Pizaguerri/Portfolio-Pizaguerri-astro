@@ -8,12 +8,11 @@ tags:
   - Canvi Climàtic
 cv:
   exposicions: []
-  llibres: []
   premis: []
-  col·laboracions: []
-summary: Una tempesta molt virulenta ens encalça per s'autobahn.
+  publicacions_i_col·laboracions: []
+summary: Una tempesta molt virulenta ens encalça per s'autobahn. Un fenòmen cada vegada més intens.
 draft: false
-summary_en: Una tempesta molt virulenta ens encalça per s'autobahn.
+summary_en: Running away from a violent storm in an old van, through  the german autobahn, June 2023. The fear and anxiety of a normal phenomena, that is just getting stronger every year due to anthropogenic climate change. 
 ---
 
 **Les tempestes durant l'estiu són normals. Però mai no hagués pensat que viuriem una així.**

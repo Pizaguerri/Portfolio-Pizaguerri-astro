@@ -5,15 +5,16 @@ date: 2025-08-12
 tags:
   - Fotografia
   - Paisatge
-  - Eclipsi
+  - Eclipsi Solar
 cv:
-  exposicions: []
-  llibres: []
-  premis: []
-  col·laboracions: []
+  exposicions: 
+  - "2026, Alcalá de Henares, Universidad de Alcalá, Col·lectiva"
+  premis:
+  - "2026, Eclipse Solar – 12 de agosto de 2026, Sociedad Española de Astronomía (SEA)"
+  publicacions_i_col·laboracions: []
 summary: Fotografia de l'eclipsi total del 12 d'Agost, sobre el cel del Cap de Cavalleria, Menorca.
 draft: false
-summary_en: Fotografia de l'eclipsi total del 12 d'Agost, sobre el cel del Cap de Cavalleria, Menorca.
+summary_en: Photographing the total solar eclipse of 12th August from Menorca, Spain. The sky turned on flames right after the totality and just before sunset.
 ---
 
 ### Eclipsi en flames sobre Cavalleria
