@@ -1,4 +1,3 @@
-
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
@@ -9,7 +8,7 @@ const cvSchema = z.object({
   premis: z.array(z.string()).optional().default([]),
 });
 
-// Campos comunes de proyectos y blog
+// Campos comunes de proyectos y textos
 const portfolioSchema = z.object({
   title: z.string(),
   description: z.string().optional(),
@@ -21,7 +20,7 @@ const portfolioSchema = z.object({
   draft: z.boolean().optional().default(false),
 });
 
-// Proyectos y blog con información curricular
+// Proyectos y textos con información curricular
 const portfolioWithCvSchema = portfolioSchema.extend({
   cv: cvSchema.default({
     exposicions: [],
@@ -30,33 +29,33 @@ const portfolioWithCvSchema = portfolioSchema.extend({
   }),
 });
 
-// Projects
-const projects = defineCollection({
+// Work
+const work = defineCollection({
   loader: glob({
     pattern: '**/*.md',
-    base: './src/content/projects',
+    base: './src/content/work',
     generateId: ({ entry }) =>
       entry.replace(/\/index\.md$/, ''),
   }),
   schema: portfolioWithCvSchema,
 });
 
-// Blog
-const blog = defineCollection({
+// Text
+const text = defineCollection({
   loader: glob({
     pattern: '**/*.md',
-    base: './src/content/blog',
+    base: './src/content/text',
     generateId: ({ entry }) =>
       entry.replace(/\/index\.md$/, ''),
   }),
   schema: portfolioWithCvSchema,
 });
 
-// About y CV manual
-const about = defineCollection({
+// Bio y CV manual
+const bio = defineCollection({
   loader: glob({
     pattern: '*.md',
-    base: './src/content/about',
+    base: './src/content/bio',
     generateId: ({ entry }) =>
       entry.replace(/\.([a-z]{2})\.md$/, '.$1'),
   }),
@@ -69,7 +68,7 @@ const about = defineCollection({
 });
 
 export const collections = {
-  projects,
-  blog,
-  about,
+  work,
+  text,
+  bio,
 };

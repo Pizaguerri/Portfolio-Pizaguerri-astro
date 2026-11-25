@@ -1,14 +1,13 @@
-
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import mediaManifest from '../data/media-manifest.json';
 import { getProjectsWithCovers } from '../utils/projects.js';
 
-const projectHref = (id) => `/proyectos/${encodeURIComponent(id.trim())}`;
+const projectHref = (id) => `/work/${encodeURIComponent(id.trim())}`;
 
 const projects = getProjectsWithCovers(
-  await getCollection('projects'),
+  await getCollection('work'),
   mediaManifest
 ).filter((project) => project.image?.src);
 

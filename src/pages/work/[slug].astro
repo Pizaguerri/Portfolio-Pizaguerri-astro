@@ -5,31 +5,31 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Expos from '../../components/expos.astro';
 import Disclosure from '../../components/Disclosure.astro';
 import Tags from '../../components/Tags.astro';
-import { useTranslations } from '../../i18n/utils';
+import { useTranslations } from '../../i18n/utils.js';
 import mediaManifest from '../../data/media-manifest.json';
 import { mediaUrl } from '../../utils/media.js';
 
 const t = useTranslations('ca');
 
 export async function getStaticPaths() {
-  const projects = await getCollection('projects');
+  const works = await getCollection('work');
 
-  return projects.map((project) => ({
-    params: { slug: project.id.trim() },
-    props: { project },
+  return works.map((work) => ({
+    params: { slug: work.id.trim() },
+    props: { work },
   }));
 }
 
-const { project } = Astro.props;
-const { Content } = await render(project);
+const { work } = Astro.props;
+const { Content } = await render(work);
 
-const slug = project.id.trim().toLowerCase();
-const isGallery = project.data.type === 'gallery';
+const slug = work.id.trim().toLowerCase();
+const isGallery = work.data.type === 'gallery';
 
-const englishSummary = project.data.summary_en?.trim();
+const englishSummary = work.data.summary_en?.trim();
 
-const projectImages = mediaManifest.filter((image) =>
-  image.path.toLowerCase().startsWith(`projects/${slug}/`)
+const workImages = mediaManifest.filter((image) =>
+  image.path.toLowerCase().startsWith(`work/${slug}/`)
 );
 
 const isCover = (path) => {
@@ -43,7 +43,7 @@ const isCover = (path) => {
   ].includes(fileName);
 };
 
-const galleryImages = projectImages
+const galleryImages = workImages
   .filter((image) => isGallery || !isCover(image.path))
   .sort((a, b) =>
     a.path.localeCompare(b.path, undefined, { numeric: true })
@@ -64,17 +64,17 @@ function getMarkdownImage(props) {
     rawSrc.split(/[?#]/)[0]
   ).replace(/\\/g, '/');
 
-  const projectPrefix = `projects/${slug}/`;
+  const workPrefix = `work/${slug}/`;
 
   const relativeSrc = normalizedSrc
     .replace(/^\/+/, '')
-    .replace(/^.*\/projects\//i, 'projects/');
+    .replace(/^.*\/work\//i, 'work/');
 
-  const image = projectImages.find((item) => {
+  const image = workImages.find((item) => {
     const normalizedPath = item.path.toLowerCase();
     const normalizedRelativeSrc = relativeSrc.toLowerCase();
 
-    if (normalizedRelativeSrc.startsWith(projectPrefix)) {
+    if (normalizedRelativeSrc.startsWith(workPrefix)) {
       return normalizedPath === normalizedRelativeSrc;
     }
 
@@ -100,28 +100,28 @@ function getMarkdownImage(props) {
 ---
 
 <BaseLayout
-  title={`${project.data.title} | Pablo Izaguerri`}
-  description={project.data.description}
+  title={`${work.data.title} | Pablo Izaguerri`}
+  description={work.data.description}
 >
   {isGallery ? (
-    <div id="project-gallery-container">
+    <div id="work-gallery-container">
       <div
         class="site-container"
         style="padding-top: 0; padding-bottom: 4rem;"
       >
         <header class="selected-header">
-          <h1>{project.data.title}</h1>
+          <h1>{work.data.title}</h1>
         </header>
 
         <div
-          id="pure-project-gallery"
+          id="pure-work-gallery"
           class="justified-gallery"
           data-pswp-active="true"
         >
           {galleryImages.map((img) => (
             <a
               href={img.url}
-              class="post-gallery-item gallery-item project-mosaic-item"
+              class="post-gallery-item gallery-item work-mosaic-item"
               data-pswp-width={img.width}
               data-pswp-height={img.height}
             >
@@ -139,7 +139,7 @@ function getMarkdownImage(props) {
     </div>
   ) : (
     <>
-      <div id="project-gallery-container">
+      <div id="work-gallery-container">
         <div
           class="slider-container"
           id="slider-container"
@@ -176,13 +176,13 @@ function getMarkdownImage(props) {
             style="padding-top: 2rem; padding-bottom: 2rem;"
           >
             <div
-              id="project-mosaic-gallery"
+              id="work-mosaic-gallery"
               class="justified-gallery"
             >
               {galleryImages.map((img) => (
                 <a
                   href={img.url}
-                  class="post-gallery-item gallery-item project-mosaic-item"
+                  class="post-gallery-item gallery-item work-mosaic-item"
                   data-pswp-width={img.width}
                   data-pswp-height={img.height}
                 >
@@ -201,10 +201,10 @@ function getMarkdownImage(props) {
       </div>
 
       <div class="content-container">
-        <article class="project-layout">
-          <aside class="project-sidebar">
+        <article class="work-layout">
+          <aside class="work-sidebar">
             <div class="sidebar-header">
-              <h1>{project.data.title}</h1>
+              <h1>{work.data.title}</h1>
 
               <button
                 id="toggle-gallery-btn"
@@ -257,16 +257,16 @@ function getMarkdownImage(props) {
               </button>
             </div>
 
-            {project.data.date && (
-              <span class="project-year">
-                {project.data.date.getFullYear()}
+            {work.data.date && (
+              <span class="work-year">
+                {work.data.date.getFullYear()}
               </span>
             )}
 
-            <Tags tags={project.data.tags} />
+            <Tags tags={work.data.tags} />
 
             <Expos
-              cv={project.data.cv}
+              cv={work.data.cv}
               lang="ca"
             />
 
@@ -277,9 +277,9 @@ function getMarkdownImage(props) {
             )}
           </aside>
 
-          <div class="project-main">
-            <p class="project-summary">
-              {project.data.description}
+          <div class="work-main">
+            <p class="work-summary">
+              {work.data.description}
             </p>
 
             <div class="prose">
@@ -311,7 +311,7 @@ function getMarkdownImage(props) {
 </BaseLayout>
 
 <style>
-  #project-gallery-container {
+  #work-gallery-container {
     width: 100%;
     margin-bottom: 3rem;
   }
@@ -357,12 +357,12 @@ function getMarkdownImage(props) {
     width: 100%;
   }
 
-  .project-mosaic-item {
+  .work-mosaic-item {
     display: block;
     cursor: zoom-in;
   }
 
-  .project-mosaic-item img {
+  .work-mosaic-item img {
     display: block;
     width: 100%;
     height: 100%;
@@ -377,7 +377,7 @@ function getMarkdownImage(props) {
     margin-bottom: 0.5rem;
   }
 
-  .project-sidebar h1 {
+  .work-sidebar h1 {
     font-size: 2.5rem;
     font-weight: 600;
     line-height: 1.1;
@@ -403,27 +403,27 @@ function getMarkdownImage(props) {
     background: var(--surface-2);
   }
 
-  .project-layout {
+  .work-layout {
     display: grid;
     grid-template-columns: 1fr 2fr;
     gap: 4rem;
     padding: 2rem 0 6rem;
   }
 
-  .project-sidebar {
+  .work-sidebar {
     position: sticky;
     top: 6rem;
     align-self: start;
   }
 
-  .project-year {
+  .work-year {
     display: block;
     font-size: 1.1rem;
     color: var(--text-2);
     margin-bottom: 2rem;
   }
 
-  .project-summary {
+  .work-summary {
     font-size: 1.5rem;
     line-height: 1.5;
     margin-top: 0;
@@ -433,13 +433,13 @@ function getMarkdownImage(props) {
   }
 
   @media (max-width: 900px) {
-    .project-layout {
+    .work-layout {
       grid-template-columns: 1fr;
       gap: 2rem;
       padding-bottom: 4rem;
     }
 
-    .project-sidebar {
+    .work-sidebar {
       position: static;
     }
 
@@ -451,7 +451,7 @@ function getMarkdownImage(props) {
       padding: 1rem;
     }
 
-    .project-summary {
+    .work-summary {
       font-size: 1.2rem;
     }
 
@@ -460,7 +460,7 @@ function getMarkdownImage(props) {
       align-items: center;
     }
 
-    .project-sidebar h1 {
+    .work-sidebar h1 {
       font-size: 2rem;
     }
   }
@@ -504,7 +504,7 @@ function getMarkdownImage(props) {
     cleanupGallery = null;
 
     if (isMosaic) {
-      const gallery = document.getElementById('project-mosaic-gallery');
+      const gallery = document.getElementById('work-mosaic-gallery');
 
       if (gallery) {
         cleanupGallery = initJustifiedGallery(gallery, {
@@ -517,8 +517,8 @@ function getMarkdownImage(props) {
     }
   }
 
-  function initProjectGallery() {
-    const pureGallery = document.getElementById('pure-project-gallery');
+  function initworkGallery() {
+    const pureGallery = document.getElementById('pure-work-gallery');
 
     if (pureGallery) {
       cleanupGallery?.();
@@ -531,7 +531,7 @@ function getMarkdownImage(props) {
       return;
     }
 
-    const gallery = document.getElementById('project-mosaic-gallery');
+    const gallery = document.getElementById('work-mosaic-gallery');
 
     if (!gallery) return;
 
@@ -567,7 +567,7 @@ function getMarkdownImage(props) {
     setActiveView(false);
   }
 
-  function cleanupProjectGallery() {
+  function cleanupworkGallery() {
     cleanupGallery?.();
     cleanupGallery = null;
 
@@ -580,8 +580,8 @@ function getMarkdownImage(props) {
     toggleHandler = null;
   }
 
-  document.addEventListener('astro:page-load', initProjectGallery);
-  document.addEventListener('astro:before-swap', cleanupProjectGallery);
+  document.addEventListener('astro:page-load', initworkGallery);
+  document.addEventListener('astro:before-swap', cleanupworkGallery);
 
-  initProjectGallery();
+  initworkGallery();
 </script>

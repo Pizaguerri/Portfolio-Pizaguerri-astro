@@ -1,4 +1,3 @@
-
 ---
 import { getEntry, getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -16,33 +15,33 @@ export async function getStaticPaths() {
 const { lang } = Astro.params;
 const cvLang = lang === 'es' || lang === 'en' ? lang : 'ca';
 
-const aboutEntry = await getEntry('about', `index.${lang}`);
+const bioEntry = await getEntry('bio', `index.${lang}`);
 
-if (!aboutEntry) {
+if (!bioEntry) {
   throw new Error(`No s'ha trobat el fitxer index.${lang}.md`);
 }
 
-const { Content } = await render(aboutEntry);
+const { Content } = await render(bioEntry);
 
 // Recuperar el CV manual
-const manualCVEntry = await getEntry('about', 'cv.ca');
+const manualCVEntry = await getEntry('bio', 'cv.ca');
 const manualCV = manualCVEntry?.data;
 
-// Recuperar proyectos y entradas del blog
-const projects = await getCollection('projects');
-const blogPosts = await getCollection('blog');
+// Recuperar proyectos y entradas de texto
+const works = await getCollection('work');
+const textPosts = await getCollection('text');
 
 // Excluir borradores
 const allEntries = [
-  ...projects,
-  ...blogPosts,
+  ...works,
+  ...textPosts,
 ].filter((entry) => !entry.data.draft);
 
 // Construir el CV combinado
 const fullCV = buildCV(allEntries, manualCV);
 ---
 
-<BaseLayout title="About | Pablo Izaguerri" lang={lang}>
+<BaseLayout title="bio | Pablo Izaguerri" lang={lang}>
   <div
     class="content-container"
     style="padding-top: 4rem; padding-bottom: 4rem;"
@@ -69,7 +68,7 @@ const fullCV = buildCV(allEntries, manualCV);
         }}
       />
 
-      <div class="about-cv">
+      <div class="bio-cv">
         <CVCategory
           category="exposicions"
           items={fullCV.exposicions}
@@ -91,7 +90,7 @@ const fullCV = buildCV(allEntries, manualCV);
 </BaseLayout>
 
 <style>
-  .about-cv {
+  .bio-cv {
     display: flex;
     flex-direction: column;
     gap: 2rem;

@@ -1,13 +1,12 @@
-
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
 
 export async function GET(context) {
   // Obtener los artículos del blog.
-  const blogPosts = await getCollection('blog');
+  const blogPosts = await getCollection('text');
 
   // Obtener los proyectos.
-  const projects = await getCollection('projects');
+  const projects = await getCollection('work');
 
   // Unir ambas colecciones.
   const allItems = [...blogPosts, ...projects];
@@ -22,9 +21,9 @@ export async function GET(context) {
     title: item.data.title,
     description: item.data.description || item.data.summary || '',
     pubDate: item.data.date,
-    link: item.collection === 'projects'
-      ? `/proyectos/${item.id}`
-      : `/blog/${item.id}`,
+    link: item.collection === 'work'
+      ? `/work/${item.id}`
+      : `/text/${item.id}`,
   }));
 
   // Ordenar cronológicamente, del más reciente al más antiguo.

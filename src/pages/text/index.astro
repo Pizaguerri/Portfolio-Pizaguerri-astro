@@ -1,11 +1,10 @@
-
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import mediaManifest from '../../data/media-manifest.json';
 import { mediaUrl } from '../../utils/media.js';
 
-const posts = (await getCollection('blog'))
+const posts = (await getCollection('text'))
   .sort((a, b) => {
     const dateA = a.data.date?.valueOf() ?? 0;
     const dateB = b.data.date?.valueOf() ?? 0;
@@ -20,7 +19,7 @@ const postsWithImages = posts.map((post) => {
     const filename = normalizedPath.split('/').pop();
 
     return (
-      normalizedPath.startsWith(`blog/${slug.toLowerCase()}/`) &&
+      normalizedPath.startsWith(`text/${slug.toLowerCase()}/`) &&
       /^cover\.(jpg|jpeg|png|webp)$/.test(filename)
     );
   });
@@ -47,13 +46,13 @@ const postsWithImages = posts.map((post) => {
     </header>
 
     <div
-      id="blog-index-gallery"
+      id="text-index-gallery"
       class="justified-grid justified-gallery"
     >
       {postsWithImages.map((post) => (
         post.image && (
           <a
-            href={`/blog/${post.slug}`}
+            href={`/text/${post.slug}`}
             class="grid-item gallery-item"
           >
             <img
@@ -80,7 +79,7 @@ const postsWithImages = posts.map((post) => {
     cleanupGallery?.();
     cleanupGallery = null;
 
-    const gallery = document.getElementById('blog-index-gallery');
+    const gallery = document.getElementById('text-index-gallery');
 
     if (!gallery) return;
 

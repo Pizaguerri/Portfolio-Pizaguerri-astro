@@ -1,4 +1,3 @@
-
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -6,7 +5,7 @@ import mediaManifest from '../../data/media-manifest.json';
 import { getProjectsWithCovers } from '../../utils/projects.js';
 
 const projectsWithImages = getProjectsWithCovers(
-  await getCollection('projects'),
+  await getCollection('work'),
   mediaManifest
 );
 ---
@@ -24,7 +23,7 @@ const projectsWithImages = getProjectsWithCovers(
     >
       {projectsWithImages.map((project) => (
         <a
-          href={`/proyectos/${project.slug}`}
+          href={`/work/${project.slug}`}
           class="grid-item gallery-item"
         >
           <img

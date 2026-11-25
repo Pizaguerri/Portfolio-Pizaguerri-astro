@@ -1,4 +1,3 @@
-
 import { mediaUrl } from './media.js';
 
 /**
@@ -21,7 +20,7 @@ export function getProjectsWithCovers(projects, mediaManifest) {
     })
     .map((project) => {
       const slug = project.id.trim();
-      const projectPath = `projects/${slug.toLowerCase()}/`;
+      const projectPath = `work/${slug.toLowerCase()}/`;
       const declaredCover = project.data.cover?.trim().toLowerCase();
 
       const cover = mediaManifest.find((image) => {

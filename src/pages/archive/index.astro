@@ -1,4 +1,3 @@
-
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -47,8 +46,8 @@ function formatDate(date) {
   return `${month}${year}`;
 }
 
-const projects = await getCollection('projects');
-const posts = await getCollection('blog');
+const projects = await getCollection('work');
+const posts = await getCollection('text');
 
 const projectItems = projects.map((project) => {
   const slug = project.id.trim();
@@ -62,8 +61,8 @@ const projectItems = projects.map((project) => {
     date: project.data.date ?? null,
     type: isGallery ? 'gallery' : 'project',
     typeLabel: isGallery ? 'Galería' : 'Proyecto',
-    href: `/proyectos/${slug}`,
-    image: getCover('projects', slug, project.data.cover),
+    href: `/work/${slug}`,
+    image: getCover('work', slug, project.data.cover),
   };
 });
 
@@ -78,8 +77,8 @@ const postItems = posts.map((post) => {
     date: post.data.date ?? null,
     type: 'text',
     typeLabel: 'Editorial',
-    href: `/blog/${slug}`,
-    image: getCover('blog', slug, post.data.cover),
+    href: `/text/${slug}`,
+    image: getCover('text', slug, post.data.cover),
   };
 });
 

@@ -4,7 +4,7 @@ const MEDIA_BASE_URL = 'https://media.pabloizaguerri.org';
  * Construye la URL pública de una imagen almacenada en R2.
  *
  * Ejemplo:
- * mediaUrl('projects/BarcelonaExperience/cover.jpg')
+ * mediaUrl('work/BarcelonaExperience/cover.jpg')
  */
 export function mediaUrl(path) {
   const normalizedPath = String(path).replace(/^\/+/, '');

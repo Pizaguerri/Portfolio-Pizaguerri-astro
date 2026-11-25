@@ -9,7 +9,7 @@ export interface Props {
 const { lang = 'ca' } = Astro.props;
 const t = useTranslations(lang);
 
-const isAboutPage = Astro.url.pathname.startsWith('/about');
+const isAboutPage = Astro.url.pathname.startsWith('/bio');
 const isHomePage = Astro.url.pathname === '/';
 ---
 
@@ -22,13 +22,13 @@ const isHomePage = Astro.url.pathname === '/';
           <!-- <span class="footer-label">{t('footer.lang')}</span> -->
           <ul class="footer-links language-switcher" id="language-switcher">
             <li>
-              <a href="/about" data-lang="ca" class={lang === 'ca' ? 'active' : ''}>CA</a>
+              <a href="/bio/" data-lang="ca" class={lang === 'ca' ? 'active' : ''}>CA</a>
             </li>
             <li>
-              <a href="/about/es" data-lang="es" class={lang === 'es' ? 'active' : ''}>ES</a>
+              <a href="/bio/es" data-lang="es" class={lang === 'es' ? 'active' : ''}>ES</a>
             </li>
             <li>
-              <a href="/about/en" data-lang="en" class={lang === 'en' ? 'active' : ''}>EN</a>
+              <a href="/bio/en" data-lang="en" class={lang === 'en' ? 'active' : ''}>EN</a>
             </li>
           </ul>
         </nav>
@@ -41,11 +41,11 @@ const isHomePage = Astro.url.pathname === '/';
         <nav class="footer-group footer-index" aria-label={t('footer.index')}>
           <!-- <span class="footer-label">{t('footer.index')}</span> -->
           <ul class="footer-links">
-            <li><a href="/indice">{t('nav.home')}</a></li>
-            <li><a href="/proyectos/Senzills">Selecció</a></li>
-            <li><a href="/proyectos">Treballs</a></li>
-            <li><a href="/blog">Textos</a></li>
-            <li><a href="/about">{t('nav.about.footer')}</a></li>
+            <li><a href="/archive/">{t('nav.home')}</a></li>
+            <li><a href="/work/Senzills">Selecció</a></li>
+            <li><a href="/work/">Treballs</a></li>
+            <li><a href="/text/">Textos</a></li>
+            <li><a href="/bio/">{t('nav.about.footer')}</a></li>
           </ul>
         </nav>
       )}
