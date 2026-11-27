@@ -2,7 +2,7 @@
 title: CV
 
 exposicions:
-  - "2026, Port de Maó, GOB Menorca, Maó, Col·lectiva"
+  - "2026, Recuperem el Port de Maó, GOB Menorca, Thalassa i Claustre del Carme, Maó, Col·lectiva"
   - "2026, CC Corralito, Terrassa, Col·lectiva"
   - "2024, El Saló, CC Can Basté, Barcelona, Col·lectiva"
   - "2022, Festival Cruïlla x Cities to be Photo Expo, Barcelona, Col·lectiva"
